@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Neon Runner — Levels + Store</title>
+<style>
+  :root{
+    --bg1:#0a0f1f; --bg2:#12243d;
+    --panel:#0f1426f2; --text:#eaf2ff; --muted:#a9b7d0;
+    --accent:#08f7fe; --accent2:#00ff85; --shadow:0 12px 60px rgba(0,0,0,.55);
+  }
+  *{box-sizing:border-box} html,body{height:100%;margin:0}
+  body{
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    color:var(--text);
+    background:radial-gradient(120% 80% at 50% -10%, var(--bg2) 0%, var(--bg1) 55%, #070a14 100%);
+    overflow:hidden; transition:background 600ms ease;
+  }
+
+  /* HUD */
+  #hud{position:fixed; inset:0 0 auto 0; height:56px; display:flex; align-items:center; gap:12px;
+       padding:10px 14px; z-index:10;
+       background:linear-gradient(180deg, rgba(0,0,0,.45), rgba(0,0,0,.22) 60%, rgba(0,0,0,0));
+       border-bottom:1px solid rgba(255,255,255,.06); backdrop-filter:saturate(1.2) blur(6px);}
+  .pill{display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:99px;
+        border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.04);}
+  .hud-btn{padding:8px 14px; border-radius:20px; border:2px solid var(--accent); color:var(--accent);
+           background:transparent; cursor:pointer; box-shadow:0 0 6px var(--accent);}
+  .hud-btn:hover{transform:translateY(-1px); background:rgba(255,255,255,.06)}
+  #stage-wrap{ width:min(96vw,1040px); margin:88px auto 24px; filter: drop-shadow(0 24px 40px rgba(0,0,0,.6)); }
+  #gameCanvas{display:block; width:100%; height:auto; aspect-ratio:16/9; border:2px solid var(--accent);
+              box-shadow:0 0 25px var(--accent); background:#071020; image-rendering:pixelated;}
+
+  /* Bars */
+  #dash-bar,#level-bar{width:min(80vw,520px); height:8px; border-radius:10px; overflow:hidden;
+    margin:10px auto 0; border:1px solid rgba(255,255,255,.15);
+    background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));}
+  #dash-fill{width:0%; height:100%; background:linear-gradient(90deg,#00ff85,#08f7fe); box-shadow:0 0 10px #00ff85}
+  #level-fill{width:0%; height:100%; background:linear-gradient(90deg,#a78bfa,#08f7fe); box-shadow:0 0 10px #a78bfa}
+
+  /* Overlays */
+  .overlay{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
+            background:linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,.6)); z-index:20 }
+  .hidden{ display:none !important }
+  .card{ width:min(92vw,640px); background:var(--panel); border:2px solid var(--accent);
+         box-shadow:0 0 26px var(--accent), var(--shadow); border-radius:20px; padding:26px; text-align:center;}
+  .card h1,.card h2{ margin:0 0 12px 0; text-shadow:0 0 12px var(--accent) }
+  .muted{ color:var(--muted) }
+  .actions{ display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin-top:14px }
+  .btn{ padding:10px 18px; border:0; cursor:pointer; border-radius:999px; color:#001016; font-weight:600;
+        background:linear-gradient(180deg,#00ff85, #08f7fe); box-shadow:0 0 16px #08f7fe }
+  .btn:hover{ filter:brightness(1.1) saturate(1.05); transform:translateY(-1px) }
+
+  /* Settings form + Store */
+  .grid{ display:grid; gap:14px; text-align:left }
+  fieldset{ border:1px solid rgba(255,255,255,.12); border-radius:14px; padding:10px 12px }
+  legend{ padding:0 6px } label{ display:inline-flex; align-items:center; gap:6px; margin-right:12px }
+  input[type="range"]{ width:100% }
+  .store-list{ display:grid; gap:10px; text-align:left; margin-top:6px }
+  .item{display:grid; grid-template-columns:1fr auto auto; gap:12px; align-items:center;
+        padding:10px 12px; border:1px solid rgba(255,255,255,.12); border-radius:12px; background:rgba(0,0,0,.18)}
+  .price{ padding:4px 10px; border-radius:14px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12) }
+  .disabled{ opacity:.55; pointer-events:none }
+</style>
+</head>
+<body>
+
+<!-- HUD -->
+<header id="hud">
+  <button id="hud-menu-btn" class="hud-btn" type="button">☰ Menu</button>
+  <div class="pill" id="score-display">Score: 0</div>
+  <div class="pill" id="level-display">Lvl: 1</div>
+  <div class="pill">🟡 Coins: <span id="coins-display">0</span></div>
+</header>
+
+<!-- Stage -->
+<div id="stage-wrap">
+  <canvas id="gameCanvas" width="960" height="540"></canvas>
+  <div id="dash-bar"><div id="dash-fill"></div></div>
+  <div id="level-bar"><div id="level-fill"></div></div>
+</div>
+
+<!-- Start -->
+<div id="start-screen" class="overlay">
+  <div class="card">
+    <h1>Neon Runner</h1>
+    <p class="muted">Collect coins, buy upgrades, reach the finish line, and advance levels.</p>
+    <div class="actions">
+      <button id="start-btn" class="btn">Start Game</button>
+      <button id="open-store-start" class="btn">Store</button>
+      <button id="open-settings" class="btn">Settings</button>
+      <button id="toggle-sound" class="btn">Toggle Sound</button>
+    </div>
+  </div>
+</div>
+
+<!-- Pause -->
+<div id="pause-screen" class="overlay hidden">
+  <div class="card">
+    <h2>Paused</h2>
+    <div class="actions">
+      <button id="resume-btn" class="btn">Resume</button>
+      <button id="open-store-pause" class="btn">Store</button>
+      <button id="pause-settings-btn" class="btn">Settings</button>
+      <button id="restart-btn" class="btn">Restart</button>
+      <button id="main-menu-btn" class="btn">Main Menu</button>
+    </div>
+  </div>
+</div>
+
+<!-- Level Complete -->
+<div id="level-complete-screen" class="overlay hidden">
+  <div class="card">
+    <h2>Level Complete!</h2>
+    <p class="muted">Nice run. Ready for the next?</p>
+    <div class="actions">
+      <button id="next-level-btn" class="btn">Next Level</button>
+      <button id="open-store-between" class="btn">Store</button>
+      <button id="main-menu-between" class="btn">Main Menu</button>
+    </div>
+  </div>
+</div>
+
+<!-- Settings -->
+<div id="settings-screen" class="overlay hidden">
+  <div class="card" style="max-width:560px">
+    <h2>Settings</h2>
+    <div class="grid">
+      <fieldset>
+        <legend>Difficulty</legend>
+        <label><input type="radio" name="difficulty" value="easy"> Easy</label>
+        <label><input type="radio" name="difficulty" value="normal" checked> Normal</label>
+        <label><input type="radio" name="difficulty" value="hard"> Hard</label>
+      </fieldset>
+      <label><input type="checkbox" id="show-grid" checked> Show Grid</label>
+      <label>Theme
+        <select id="theme-select">
+          <option value="neon" selected>Neon</option>
+          <option value="cyber">Cyber</option>
+        </select>
+      </label>
+      <label>Sound Volume
+        <input id="volume-range" type="range" min="0" max="1" step="0.05" value="1">
+      </label>
+      <div class="actions">
+        <button id="save-settings" class="btn">Save</button>
+        <button id="back-settings" class="btn">Back</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Store -->
+<div id="store-screen" class="overlay hidden">
+  <div class="card">
+    <h2>Store</h2>
+    <p class="muted">Spend coins to power up. Coins persist between runs.</p>
+    <div class="store-list">
+      <div class="item">
+        <div>
+          <strong>Agility</strong> — Faster up/down movement (acceleration & top speed).
+          <div class="muted" id="agility-level"></div>
+        </div>
+        <div class="price">Cost: <span id="agility-cost">10</span> 🟡</div>
+        <button id="buy-agility" class="btn">Buy</button>
+      </div>
+
+      <div class="item">
+        <div>
+          <strong>Magnet</strong> — Increases coin pickup radius.
+          <div class="muted" id="magnet-level"></div>
+        </div>
+        <div class="price">Cost: <span id="magnet-cost">15</span> 🟡</div>
+        <button id="buy-magnet" class="btn">Buy</button>
+      </div>
+
+      <div class="item">
+        <div>
+          <strong>Dash+</strong> — Longer dash duration.
+          <div class="muted" id="dash-level"></div>
+        </div>
+        <div class="price">Cost: <span id="dash-cost">20</span> 🟡</div>
+        <button id="buy-dash" class="btn">Buy</button>
+      </div>
+    </div>
+    <div class="actions" style="margin-top:16px">
+      <button id="close-store" class="btn">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Game Over -->
+<div id="game-over-screen" class="overlay hidden">
+  <div class="card">
+    <h2>Game Over</h2>
+    <p id="final-score">Score: 0</p>
+    <p id="best-score">High Score: 0</p>
+    <div class="actions">
+      <button id="play-again-btn" class="btn">Play Again</button>
+      <button id="open-store-over" class="btn">Store</button>
+      <button id="main-menu-over" class="btn">Main Menu</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  // Canvas
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
+
+  // UI references
+  const startScreen = document.getElementById('start-screen');
+  const pauseScreen = document.getElementById('pause-screen');
+  const settingsScreen = document.getElementById('settings-screen');
+  const storeScreen = document.getElementById('store-screen');
+  const levelCompleteScreen = document.getElementById('level-complete-screen');
+  const gameOverScreen = document.getElementById('game-over-screen');
+
+  const startBtn = document.getElementById('start-btn');
+  const openStoreStart = document.getElementById('open-store-start');
+  const openSettingsBtn = document.getElementById('open-settings');
+  const toggleSoundBtn = document.getElementById('toggle-sound');
+
+  const resumeBtn = document.getElementById('resume-btn');
+  const openStorePause = document.getElementById('open-store-pause');
+  const pauseSettingsBtn = document.getElementById('pause-settings-btn');
+  const restartBtn = document.getElementById('restart-btn');
+  const mainMenuBtn = document.getElementById('main-menu-btn');
+
+  const nextLevelBtn = document.getElementById('next-level-btn');
+  const openStoreBetween = document.getElementById('open-store-between');
+  const mainMenuBetween = document.getElementById('main-menu-between');
+
+  const playAgainBtn = document.getElementById('play-again-btn');
+  const openStoreOver = document.getElementById('open-store-over');
+  const mainMenuOver = document.getElementById('main-menu-over');
+
+  const saveSettingsBtn = document.getElementById('save-settings');
+  const backSettingsBtn = document.getElementById('back-settings');
+
+  const hudMenuBtn = document.getElementById('hud-menu-btn');
+  const scoreDisplay = document.getElementById('score-display');
+  const levelDisplay = document.getElementById('level-display');
+  const coinsDisplay = document.getElementById('coins-display');
+
+  const diffRadios = [...document.querySelectorAll('input[name="difficulty"]')];
+  const showGridChk = document.getElementById('show-grid');
+  const themeSelect = document.getElementById('theme-select');
+  const volumeRange = document.getElementById('volume-range');
+
+  // Store refs
+  const agilityLevelEl = document.getElementById('agility-level');
+  const magnetLevelEl  = document.getElementById('magnet-level');
+  const dashLevelEl    = document.getElementById('dash-level');
+  const agilityCostEl  = document.getElementById('agility-cost');
+  const magnetCostEl   = document.getElementById('magnet-cost');
+  const dashCostEl     = document.getElementById('dash-cost');
+  const buyAgilityBtn  = document.getElementById('buy-agility');
+  const buyMagnetBtn   = document.getElementById('buy-magnet');
+  const buyDashBtn     = document.getElementById('buy-dash');
+
+  const closeStoreBtn  = document.getElementById('close-store');
+
+  const dashFill  = document.getElementById('dash-fill');
+  const levelFill = document.getElementById('level-fill');
+
+  // Audio
+  let soundEnabled = true;
+  let audioCtx;
+  function beep(freq = 660, time = 0.08){
+    try{
+      if(!soundEnabled) return;
+      if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gain= audioCtx.createGain();
+      osc.type='triangle'; osc.frequency.value=freq;
+      gain.gain.value = parseFloat(volumeRange.value||'1')*0.06;
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(); osc.stop(audioCtx.currentTime+time);
+    }catch(e){}
+  }
+
+  // Settings
+  let difficulty='normal', showGrid=true, theme='neon';
+
+  // Persistent meta
+  let coins = Number(localStorage.getItem('nr_coins')||0);
+  let agilityLevel = Number(localStorage.getItem('nr_agility')||0);
+  let magnetLevel  = Number(localStorage.getItem('nr_magnet')||0);
+  let dashPlusLevel= Number(localStorage.getItem('nr_dashplus')||0);
+  function agilityCost(){ return 10 * Math.pow(2, agilityLevel); }
+  function magnetCost(){  return 15 * Math.pow(2, magnetLevel); }
+  function dashPlusCost(){ return 20 * Math.pow(2, dashPlusLevel); }
+  function saveMeta(){
+    localStorage.setItem('nr_coins', coins);
+    localStorage.setItem('nr_agility', agilityLevel);
+    localStorage.setItem('nr_magnet', magnetLevel);
+    localStorage.setItem('nr_dashplus', dashPlusLevel);
+  }
+
+  // Game state
+  let gameState='start';
+  let lastTime=0, score=0, bestScore=Number(localStorage.getItem('neonRunnerBest')||0);
+  let currentLevel=1;
+  let levelSpeedMult=1;                      // increases gently per level
+  const levelLengthBase = 3200; // was 2400
+  let levelDistance = levelLengthBase;
+  let distanceRemaining = levelDistance;
+  const finishPadding = 120;
+
+  // Player & motion
+  const player = { x:50, y:canvas.height/2-25, w:40, h:40, color:'#08f7fe', vy:0, baseMaxVy:320, maxVy:320 };
+  const keys = {};
+
+  function applyAgility(){
+    const mult = 1 + agilityLevel*0.15;
+    player.maxVy = player.baseMaxVy * mult;
+  }
+  applyAgility();
+
+  // Theme palette / level background
+  let activeColors=['#08f7fe','#00ff85','#ffd166','#ff6b6b','#a78bfa'];
+  function setLevelBackground(){
+    const idx = (currentLevel-1)%5;
+    const combos = [
+      ['#0a0f1f','#12243d'],
+      ['#1a0e2b','#381a6b'],
+      ['#071a1a','#0e2a2a'],
+      ['#1a1209','#342210'],
+      ['#0a0e16','#142032'],
+    ];
+    const [b1,b2]=combos[idx];
+    document.documentElement.style.setProperty('--bg1', b1);
+    document.documentElement.style.setProperty('--bg2', b2);
+  }
+  function applyTheme(){
+    activeColors = (theme==='cyber')
+      ? ['#7a5cff','#ff69e0','#22d3ee','#34d399','#f59e0b']
+      : ['#08f7fe','#00ff85','#ffd166','#ff6b6b','#a78bfa'];
+    player.color = activeColors[0];
+  }
+
+  // Obstacles & coins
+  let obstacles=[], spawnTimer=0, spawnInterval=1.2;
+  let coinsOnField=[], coinTimer=0;
+
+  function spawnObstacle(){
+    const h = 30 + Math.random()*160;
+    const w = 16 + Math.random()*24;
+    const y = Math.random()*(canvas.height - h - 20) + 10;
+    const color = activeColors[(Math.random()*activeColors.length)|0];
+    obstacles.push({ x: canvas.width+40, y, w, h, color });
+  }
+  function spawnCoin(){
+    const r = (Math.random()<0.15)?10:7, value=(r===10)?5:1;
+    const y = 12 + Math.random()*(canvas.height-24);
+    coinsOnField.push({ x: canvas.width+30, y, r, value, t:Math.random()*1000 });
+  }
+  function rectsOverlap(a,b){ return a.x<b.x+b.w && a.x+a.w>b.x && a.y<b.y+b.h && a.y+a.h>b.y; }
+
+  // Dash
+  let dashActive=false, dashCooldown=0, dashTime=0;
+  const dashCooldownMax=2.2;
+  function dashDuration(){ return 0.5 + dashPlusLevel*0.12; }
+
+  // Difficulty helpers
+  function baseSpeed(){
+    switch(difficulty){
+      case 'easy': return 180;
+      case 'hard': return 250;
+      default: return 210;
+    }
+  }
+  function minSpawn(){
+    switch(difficulty){
+      case 'easy': return 0.7;
+      case 'hard': return 0.45;
+      default: return 0.55;
+    }
+  }
+
+  // HUD & Store UI
+  function updateHud(){
+    scoreDisplay.textContent = 'Score: '+Math.floor(score);
+    levelDisplay.textContent = 'Lvl: '+currentLevel;
+    coinsDisplay.textContent = coins;
+  }
+  function refreshStoreUI(){
+    agilityLevelEl.textContent = 'Level: '+agilityLevel+' (+'+(agilityLevel*15)+'% speed/accel)';
+    magnetLevelEl.textContent  = 'Level: '+magnetLevel+' (pickup +'+(magnetLevel*10)+'px)';
+    dashLevelEl.textContent    = 'Level: '+dashPlusLevel+' (dash '+dashDuration().toFixed(2)+'s)';
+    agilityCostEl.textContent = agilityCost();
+    magnetCostEl.textContent  = magnetCost();
+    dashCostEl.textContent    = dashPlusCost();
+    buyAgilityBtn.classList.toggle('disabled', coins<agilityCost());
+    buyMagnetBtn.classList.toggle('disabled',  coins<magnetCost());
+    buyDashBtn.classList.toggle('disabled',    coins<dashPlusCost());
+  }
+
+  function resetRun(){
+    score=0;
+    obstacles.length=0; coinsOnField.length=0;
+    spawnTimer=0; coinTimer=0;
+    dashActive=false; dashCooldown=0; dashTime=0;
+    player.x=50; player.y=canvas.height/2-25; player.vy=0;
+    distanceRemaining=levelDistance;
+    updateHud(); updateLevelFill();
+  }
+
+  function startLevel(levelNumber){
+    currentLevel = levelNumber;
+    levelSpeedMult = 1 + (currentLevel-1)*0.07;
+    levelDistance = levelLengthBase + (currentLevel-1)*240;
+    distanceRemaining = levelDistance;
+    setLevelBackground();
+    resetRun();
+  }
+
+  function updateLevelFill(){
+    const pc = Math.max(0, Math.min(1, 1 - (distanceRemaining / levelDistance)));
+    levelFill.style.width = (pc*100).toFixed(1)+'%';
+  }
+
+  function levelComplete(){
+    gameState='between';
+    levelCompleteScreen.classList.remove('hidden');
+    beep(1020, .12);
+  }
+
+  // Draw
+  function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    if(showGrid){
+      const spacing=40, offset=(performance.now()*0.05)%spacing;
+      ctx.strokeStyle='rgba(8, 247, 254, 0.05)'; ctx.lineWidth=1;
+      for(let x=offset; x<canvas.width; x+=spacing){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,canvas.height); ctx.stroke(); }
+      for(let y=offset; y<canvas.height; y+=spacing){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(canvas.width,y); ctx.stroke(); }
+    }
+
+    // Finish line
+    const laneMin = 20, laneMax = canvas.width - finishPadding;
+    const finishX = laneMin + (distanceRemaining/levelDistance) * (laneMax - laneMin);
+
+    ctx.save();
+    ctx.strokeStyle = '#ffd166'; ctx.lineWidth=4; ctx.shadowColor='#ffd166'; ctx.shadowBlur=14;
+    ctx.beginPath(); ctx.moveTo(finishX, 20); ctx.lineTo(finishX, canvas.height-20); ctx.stroke();
+    ctx.font='bold 16px system-ui'; ctx.fillStyle='#ffd166'; ctx.textAlign='center';
+    ctx.fillText('FINISH', Math.max(40, Math.min(canvas.width-40, finishX)), 16);
+    ctx.restore();
+
+    // Coins
+    for(const c of coinsOnField){
+      const grad=ctx.createRadialGradient(c.x,c.y,0,c.x,c.y,c.r*1.6);
+      if(c.value===5){ grad.addColorStop(0,'rgba(255,153,0,1)'); grad.addColorStop(1,'rgba(255,102,0,0)'); }
+      else{ grad.addColorStop(0,'rgba(255,235,59,1)'); grad.addColorStop(1,'rgba(255,235,59,0)'); }
+      ctx.fillStyle=grad; ctx.beginPath(); ctx.arc(c.x,c.y,c.r,0,Math.PI*2); ctx.fill();
+      ctx.strokeStyle='rgba(255,255,255,.25)'; ctx.beginPath(); ctx.arc(c.x,c.y,c.r*0.6,0,Math.PI*2); ctx.stroke();
+    }
+
+    // Player
+    ctx.fillStyle = dashActive ? activeColors[1] : player.color;
+    ctx.shadowColor=ctx.fillStyle; ctx.shadowBlur=18;
+    ctx.fillRect(player.x, player.y, player.w, player.h);
+    ctx.shadowBlur=0;
+
+    // Obstacles
+    for(const o of obstacles){
+      ctx.fillStyle=o.color; ctx.shadowColor=o.color; ctx.shadowBlur=12;
+      ctx.fillRect(o.x,o.y,o.w,o.h);
+    }
+    ctx.shadowBlur=0;
+
+    // Dash bar
+    const ready=(dashCooldown<=0);
+    const pc = dashActive ? (1 - dashTime/dashDuration()) : ready ? 1 : (1 - dashCooldown/dashCooldownMax);
+    dashFill.style.width = (pc*100).toFixed(1)+'%';
+    dashFill.style.opacity = dashActive ? '1' : ready ? '1' : '.75';
+  }
+
+  // Update
+  function update(dt){
+    const timeScale = dashActive ? 0.55 : 1;
+    const t = dt*timeScale;
+
+    score += t*(40 + currentLevel*10);
+    updateHud();
+
+    spawnInterval = Math.max(minSpawn(), 1.2 - currentLevel*0.02 - score/1800);
+    spawnTimer += t; if(spawnTimer>=spawnInterval){ spawnTimer=0; spawnObstacle(); }
+
+    const coinMin = (difficulty==='hard')?1.1:(difficulty==='easy')?1.9:1.5;
+    coinTimer += t; if(coinTimer>=coinMin){ coinTimer=0; spawnCoin(); }
+
+    // Movement — agility applies via maxVy
+    const accel = (player.maxVy * 3.6);
+    if(keys.ArrowUp||keys.KeyW)   player.vy -= accel*t;
+    if(keys.ArrowDown||keys.KeyS) player.vy += accel*t;
+
+    player.vy *= Math.pow(0.000001, t);
+    player.y += player.vy*t;
+    if(player.y<6){player.y=6; player.vy=0}
+    if(player.y+player.h>canvas.height-6){player.y=canvas.height-6-player.h; player.vy=0}
+
+    // World speed
+    const spd = (baseSpeed()*levelSpeedMult + score*0.05);
+    for(const o of obstacles) o.x -= spd*t;
+    obstacles = obstacles.filter(o=>o.x+o.w>-40);
+
+    for(const c of coinsOnField) c.x -= (spd*0.8)*t;
+
+    // Coin pickup
+    const pickupR = 18 + magnetLevel*10;
+    for(let i=coinsOnField.length-1;i>=0;i--){
+      const c=coinsOnField[i];
+      const cx=player.x+player.w/2, cy=player.y+player.h/2;
+      const dist=Math.hypot(c.x-cx,c.y-cy);
+      if(dist<=pickupR){ coins+=c.value; saveMeta(); coinsOnField.splice(i,1); beep(920,.06); }
+      else if(c.x<-20){ coinsOnField.splice(i,1); }
+    }
+
+    // Collisions
+    for(let i=obstacles.length-1;i>=0;i--){
+      const o=obstacles[i];
+      if(rectsOverlap(player,o)){
+        if(dashActive){ obstacles.splice(i,1); score+=25; beep(880,.06); }
+        else{ gameOver(); return; }
+      }
+    }
+
+    // Progress toward finish
+    distanceRemaining -= spd*t;
+    updateLevelFill();
+    if(distanceRemaining<=0){ levelComplete(); return; }
+
+    // Dash timers
+    if(dashActive){ dashTime -= dt; if(dashTime<=0) dashActive=false; }
+    else if(dashCooldown>0){ dashCooldown -= dt; }
+  }
+
+  // Loop
+  function loop(ts){
+    if(gameState!=='running') return;
+    if(!lastTime) lastTime = ts;
+    const dt = Math.min(0.033, (ts-lastTime)/1000);
+    lastTime = ts;
+    update(dt); draw();
+    if(gameState==='running') requestAnimationFrame(loop);
+  }
+
+  // State helpers
+  function show(el){ el.classList.remove('hidden'); }
+  function hide(el){ el.classList.add('hidden'); }
+
+  function startGame(){
+    gameState='running'; hide(startScreen); hide(pauseScreen); hide(settingsScreen);
+    hide(storeScreen); hide(levelCompleteScreen); hide(gameOverScreen);
+    startLevel(currentLevel); lastTime=0; requestAnimationFrame(loop);
+  }
+  function pauseGame(){ if(gameState!=='running')return; gameState='paused'; show(pauseScreen); }
+  function resumeGame(){ if(gameState!=='paused')return; hide(pauseScreen); gameState='running'; lastTime=0; requestAnimationFrame(loop); }
+  function gameOver(){
+    gameState='over';
+    bestScore = Math.max(bestScore, Math.floor(score));
+    localStorage.setItem('neonRunnerBest', bestScore);
+    document.getElementById('final-score').textContent='Score: '+Math.floor(score);
+    document.getElementById('best-score').textContent='High Score: '+bestScore;
+    show(gameOverScreen); beep(220,.18);
+  }
+  // Try Again from Game Over
+  playAgainBtn.addEventListener('click', ()=>{
+    hide(gameOverScreen);
+    startGame();
+  });
+
+  // Buttons wiring
+  startBtn.addEventListener('click', startGame);
+  openStoreStart.addEventListener('click', ()=>{ refreshStoreUI(); show(storeScreen); });
+  openStorePause.addEventListener('click', ()=>{ refreshStoreUI(); show(storeScreen); });
+  openStoreBetween.addEventListener('click', ()=>{ refreshStoreUI(); show(storeScreen); });
+  openStoreOver.addEventListener('click', ()=>{ refreshStoreUI(); show(storeScreen); });
+
+  resumeBtn.addEventListener('click', resumeGame);
+  pauseSettingsBtn.addEventListener('click', ()=>show(settingsScreen));
+  restartBtn.addEventListener('click', ()=>{ currentLevel=1; startGame(); });
+  mainMenuBtn.addEventListener('click', ()=>{ gameState='start'; show(startScreen); hide(pauseScreen); });
+  mainMenuBetween.addEventListener('click', ()=>{ gameState='start'; show(startScreen); hide(levelCompleteScreen); });
+  mainMenuOver.addEventListener('click', ()=>{ gameState='start'; show(startScreen); hide(gameOverScreen); });
+
+  nextLevelBtn.addEventListener('click', ()=>{
+    currentLevel += 1;
+    hide(levelCompleteScreen);
+    startGame();
+  });
+
+  // Settings
+  openSettingsBtn.addEventListener('click', ()=>show(settingsScreen));
+  backSettingsBtn.addEventListener('click', ()=>hide(settingsScreen));
+  saveSettingsBtn.addEventListener('click', ()=>{
+    difficulty = (diffRadios.find(r=>r.checked)?.value)||'normal';
+    showGrid = showGridChk.checked;
+    theme = themeSelect.value; applyTheme();
+    hide(settingsScreen);
+  });
+
+  // Store purchasing
+  closeStoreBtn.addEventListener('click', ()=>hide(storeScreen));
+  buyAgilityBtn.addEventListener('click', ()=>{
+    const cost = agilityCost(); if(coins<cost) return beep(240,.05);
+    coins -= cost; agilityLevel++; saveMeta(); applyAgility(); refreshStoreUI(); updateHud(); beep(760,.08);
+  });
+  buyMagnetBtn.addEventListener('click', ()=>{
+    const cost = magnetCost(); if(coins<cost) return beep(240,.05);
+    coins -= cost; magnetLevel++; saveMeta(); refreshStoreUI(); updateHud(); beep(760,.08);
+  });
+  buyDashBtn.addEventListener('click', ()=>{
+    const cost = dashPlusCost(); if(coins<cost) return beep(240,.05);
+    coins -= cost; dashPlusLevel++; saveMeta(); refreshStoreUI(); updateHud(); beep(760,.08);
+  });
+
+  // HUD menu toggle
+  hudMenuBtn.addEventListener('click', ()=>{
+    if (gameState === 'running') pauseGame();
+    else if (gameState === 'paused') resumeGame();
+  });
+
+  // Sound toggle
+  toggleSoundBtn.addEventListener('click', ()=>{
+    soundEnabled = !soundEnabled;
+    toggleSoundBtn.textContent = soundEnabled ? 'Mute Sound' : 'Unmute Sound';
+    if (soundEnabled) beep(800,.06);
+  });
+
+  // Keyboard controls
+  window.addEventListener('keydown', (e)=>{
+    keys[e.code] = true;
+
+    if (e.code === 'Escape'){
+      if (gameState === 'running') pauseGame();
+      else if (gameState === 'paused') resumeGame();
+    }
+
+    if (e.code === 'Space' && gameState === 'running'){
+      if (!dashActive && dashCooldown <= 0){
+        dashActive = true;
+        dashTime = dashDuration();
+        dashCooldown = 2.2;
+        beep(980,.07);
+      }
+      e.preventDefault();
+    }
+  });
+
+  window.addEventListener('keyup', (e)=>{ keys[e.code] = false; });
+
+  // Init
+  coinsDisplay.textContent = coins;
+  applyAgility();
+  applyTheme();
+  setLevelBackground();
+  updateHud();
+  refreshStoreUI();
+})();
+</script>
+</body>
+</html>
