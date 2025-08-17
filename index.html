@@ -280,9 +280,9 @@ iframe#frame{width:100%;height:calc(100vh - 180px);border:0;background:#000}
     // ---- Contact form ----
     const EMAIL = "tmdcgameshelp@gmail.com";
     // EmailJS configuration – replace the placeholders with your own keys.
-    const EMAILJS = { service: '<YOUR_SERVICE_ID>', template: '<YOUR_TEMPLATE_ID>', publicKey: '<YOUR_PUBLIC_KEY>' };
+    const EMAILJS = { service: 'service_jz4cvxf', template: 'template_dokxss8', publicKey: 'WgRcw9Dm8lTOokPI' };
     // Initialize EmailJS if keys are provided
-    if (EMAILJS.publicKey && EMAILJS.publicKey !== '<YOUR_PUBLIC_KEY>') {
+    if (EMAILJS.publicKey) {
       emailjs.init(EMAILJS.publicKey);
     }
 
@@ -309,7 +309,7 @@ ${msg}`;
     f.addEventListener('submit', async (e) => {
       e.preventDefault();
       // If EmailJS keys are provided (replace placeholders), send via EmailJS
-      if (EMAILJS.service !== '<YOUR_SERVICE_ID>' && EMAILJS.template !== '<YOUR_TEMPLATE_ID>' && EMAILJS.publicKey !== '<YOUR_PUBLIC_KEY>') {
+      if (EMAILJS.service && EMAILJS.template && EMAILJS.publicKey) {
         try {
           await emailjs.send(EMAILJS.service, EMAILJS.template, {
             from_name: f.name.value,
@@ -328,15 +328,6 @@ ${msg}`;
       // Fallback: open mail app with prefilled message
       window.location.href = buildMailto();
       note.textContent = 'Opening your mail app…';
-    });
-
-        note.textContent = "Message sent. Thank you!";
-        note.style.color = "var(--good)";
-        f.reset(); return;
-      }catch(err){
-        // Fallback to mailto if API fails
-      }
-      */
     });
 </script>
 </body>
