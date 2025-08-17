@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>TMDC • Neon Arcade Portal</title>
+<meta name="description" content="A futuristic portal for hosting HTML games. Drop in your game1.html and game2.html and you're live."/>
+<style>
+  :root{
+    --bg:#07080f; --bg2:#0b0f1c; --panel:rgba(17,22,36,.6); --panel-strong:rgba(17,22,36,.9);
+    --glass:rgba(255,255,255,.06); --glow:#6bf3ff; --glow2:#7a5cff; --muted:#a9b7d0; --text:#eaf2ff;
+    --ok:#45e18a; --warn:#ffd166; --bad:#ff6b6b; --shadow:0 10px 50px rgba(0,0,0,.45);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:linear-gradient(180deg,var(--bg) 0%,var(--bg2) 100%);
+       color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+  a{color:inherit;text-decoration:none}
+  .wrap{min-height:100%;display:flex;flex-direction:column}
+  /* ==== Animated starfield background */
+  .stars{position:fixed;inset:0;pointer-events:none;z-index:-2;}
+  .stars:before,.stars:after{content:"";position:absolute;inset:-100px;background:radial-gradient(2px 2px at 20% 30%, #fff8, #fff0 40%),
+      radial-gradient(2px 2px at 80% 70%, #fff8, #fff0 40%),
+      radial-gradient(1px 1px at 50% 50%, #fff7, #fff0 40%),
+      radial-gradient(1px 1px at 10% 90%, #fff7, #fff0 40%),
+      radial-gradient(1px 1px at 90% 10%, #fff7, #fff0 40%);
+      filter:drop-shadow(0 0 6px #8ef) drop-shadow(0 0 12px #8ef)}
+  .stars:after{animation:drift 40s linear infinite;opacity:.5}
+  @keyframes drift{from{transform:translateY(0)}to{transform:translateY(-200px)}}
+
+  /* ==== Header / Nav */
+  header{position:sticky;top:0;backdrop-filter:saturate(180%) blur(12px);background:linear-gradient(180deg,rgba(10,14,22,.85),rgba(10,14,22,.35));
+    border-bottom:1px solid var(--glass);z-index:10}
+  .container{max-width:1100px;margin:0 auto;padding:16px}
+  .row{display:flex;align-items:center;gap:14px}
+  .brand{display:flex;align-items:center;gap:10px}
+  .logo{width:36px;height:36px;border-radius:10px;position:relative;background:radial-gradient(120px 120px at -20% -20%,#6bf3ff66,#0000),radial-gradient(120px 120px at 120% 120%,#7a5cff55,#0000),#0d1220;border:1px solid #1a2237;box-shadow:0 0 24px #6bf3ff22 inset, 0 0 40px #7a5cff22 inset}
+  .logo:after{content:"TM";position:absolute;inset:0;display:grid;place-items:center;font-weight:700;font-size:.75rem;letter-spacing:.06em;color:#9adcff}
+  h1{font-size:1rem;margin:0;letter-spacing:.08em;text-transform:uppercase;color:#cfeaff}
+  nav{margin-left:auto;display:flex;gap:10px}
+  .tab{padding:10px 12px;border:1px solid var(--glass);border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));
+    box-shadow:var(--shadow);cursor:pointer;transition:all .25s ease;font-size:.9rem}
+  .tab[aria-selected="true"], .tab:hover{border-color:#6bf3ff88;box-shadow:0 0 0 3px #6bf3ff22, 0 8px 28px #000a}
+
+  /* ==== Hero */
+  .hero{padding:36px 16px 8px}
+  .title{font-size:2rem;margin:0 0 8px;line-height:1.15}
+  .subtitle{margin:0;color:var(--muted)}
+  .glow{background:linear-gradient(90deg,var(--glow),var(--glow2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .chip{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--glass);padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.04);font-size:.85rem;margin-top:14px}
+
+  /* ==== Grid of games */
+  .grid{display:grid;gap:16px;padding:24px 16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+  .card{position:relative;border:1px solid var(--glass);border-radius:20px;background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));
+    overflow:hidden;box-shadow:var(--shadow);transition:transform .2s ease, box-shadow .2s ease}
+  .card:hover{transform:translateY(-4px);box-shadow:0 18px 60px rgba(0,0,0,.55)}
+  .thumb{height:160px;background:radial-gradient(240px 140px at 20% 20%,#6bf3ff22,#0000),radial-gradient(200px 120px at 80% 80%,#7a5cff22,#0000),
+          linear-gradient(135deg,#0e1424,#0b0f1c);border-bottom:1px solid var(--glass);position:relative}
+  .scanline{position:absolute;inset:0;background:linear-gradient(transparent 60%,#6bf3ff11 60%),repeating-linear-gradient(0deg,#fff0 0 14px,#6bf3ff11 15px 15px);mix-blend-mode:screen;opacity:.35}
+  .info{padding:14px 14px 16px}
+  .tag{display:inline-block;font-size:.7rem;color:#9edbff;border:1px dashed #6bf3ff55;padding:4px 8px;border-radius:999px;margin-bottom:10px}
+  .card h3{margin:0 0 8px}
+  .desc{margin:0 0 14px;color:var(--muted);font-size:.95rem}
+  .actions{display:flex;gap:10px}
+  .btn{flex:1;display:inline-flex;justify-content:center;align-items:center;gap:8px;padding:10px 12px;border-radius:12px;border:1px solid #1b263d;background:linear-gradient(180deg,#101a2d,#0f1525);cursor:pointer}
+  .btn.primary{border-color:#2a3b61;box-shadow:0 0 0 2px #6bf3ff22 inset}
+  .btn:hover{filter:brightness(1.08)}
+
+  /* ==== Panels */
+  .panel{display:none}
+  .panel[aria-hidden="false"]{display:block}
+  .section{max-width:1000px;margin:0 auto;padding:6px 16px 28px}
+  .glass{border:1px solid var(--glass);border-radius:16px;background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));padding:16px}
+  .kbd{border:1px solid #6bf3ff55;border-radius:8px;padding:3px 6px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.85rem}
+  pre{margin:0;background:#0b1020;border:1px solid #1a2440;border-radius:12px;padding:14px;overflow:auto}
+  code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.9rem}
+
+  /* ==== Footer */
+  footer{margin-top:auto;border-top:1px solid var(--glass);background:#0a0e16aa;backdrop-filter:blur(8px)}
+  .foot{max-width:1100px;margin:0 auto;padding:18px 16px;color:#9fb3d6;display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+  .tiny{font-size:.8rem;color:#7f8fb0}
+
+  /* Responsive tweaks */
+  @media (min-width:900px){
+    .title{font-size:2.4rem}
+  }
+</style>
+</head>
+<body>
+<div class="stars"></div>
+<div class="wrap">
+  <header>
+    <div class="container row">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <h1>TMDC • Neon Arcade</h1>
+      </div>
+      <nav role="tablist" aria-label="Main">
+        <button class="tab" role="tab" aria-controls="tab-games" aria-selected="true">Games</button>
+        <button class="tab" role="tab" aria-controls="tab-controls" aria-selected="false">Controls</button>
+        <button class="tab" role="tab" aria-controls="tab-deploy" aria-selected="false">Deploy / Commands</button>
+        <button class="tab" role="tab" aria-controls="tab-about" aria-selected="false">About</button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero container">
+    <h2 class="title">Welcome to the <span class="glow">Neon Arcade</span></h2>
+    <p class="subtitle">Drop your HTML games in this folder and link them below. No ads, no nonsense.</p>
+    <div class="chip">⚡ Tip: rename your files to <span class="kbd">game1.html</span> and <span class="kbd">game2.html</span> (or edit the links).</div>
+  </section>
+
+  <!-- Tabs: GAMES -->
+  <main class="panel" id="tab-games" aria-hidden="false">
+    <div class="grid container">
+      <!-- Game 1 Card -->
+      <article class="card">
+        <div class="thumb">
+          <div class="scanline"></div>
+        </div>
+        <div class="info">
+          <span class="tag">Arcade</span>
+          <h3>Game One</h3>
+          <p class="desc">Fast-paced HTML5 action. Blast, dash, and survive the waves.</p>
+          <div class="actions">
+            <a class="btn primary" href="game1.html" target="_blank" rel="noopener">▶ Play</a>
+            <a class="btn" href="#" data-preview="game1.html">👁 Preview</a>
+          </div>
+        </div>
+      </article>
+
+      <!-- Game 2 Card -->
+      <article class="card">
+        <div class="thumb">
+          <div class="scanline"></div>
+        </div>
+        <div class="info">
+          <span class="tag">Shooter</span>
+          <h3>Game Two</h3>
+          <p class="desc">Destructible worlds, crunchy SFX, and a boss every 5 levels.</p>
+          <div class="actions">
+            <a class="btn primary" href="game2.html" target="_blank" rel="noopener">▶ Play</a>
+            <a class="btn" href="#" data-preview="game2.html">👁 Preview</a>
+          </div>
+        </div>
+      </article>
+
+      <!-- Optional: Add more games by duplicating a card above -->
+    </div>
+  </main>
+
+  <!-- Tabs: CONTROLS / HOW TO PLAY -->
+  <section class="panel" id="tab-controls" aria-hidden="true">
+    <div class="section">
+      <div class="glass">
+        <h3 style="margin-top:0">Default Controls</h3>
+        <p class="tiny">(Edit this to match your games)</p>
+        <ul>
+          <li><span class="kbd">WASD</span> or <span class="kbd">Arrow Keys</span> — Move</li>
+          <li><span class="kbd">Mouse</span> — Aim • <span class="kbd">Click</span> — Fire</li>
+          <li><span class="kbd">Space</span> — Dash / Shield</li>
+          <li><span class="kbd">R</span> — Reload • <span class="kbd">P</span> — Pause</li>
+        </ul>
+        <h4>Performance</h4>
+        <ul>
+          <li>Use <span class="kbd">F</span> to toggle FPS overlay (if your game supports it).</li>
+          <li>Close other tabs for best performance on mobile.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tabs: DEPLOY / COMMANDS -->
+  <section class="panel" id="tab-deploy" aria-hidden="true">
+    <div class="section">
+      <div class="glass" style="margin-bottom:16px">
+        <h3 style="margin-top:0">Host for Free (Pick one)</h3>
+        <ol>
+          <li><strong>GitHub Pages</strong> — static hosting with no ads. Good for HTML/JS games.</li>
+          <li><strong>Netlify</strong> — drag‑and‑drop your folder; auto‑deploys from GitHub.</li>
+          <li><strong>Vercel</strong> — great for React/Next.js; also works for static sites.</li>
+        </ol>
+      </div>
+
+      <div class="glass" style="margin-bottom:16px">
+        <h4>GitHub Pages — Quick Setup</h4>
+        <p>Run these commands in your project folder (replace <code>YOUR_USERNAME</code> with your GitHub username):</p>
+        <pre><code id="gh-cmds">git init
+git add .
+git commit -m "Initial TMDC neon arcade"
+git branch -M main
+git remote add origin https://github.com/YOUR_USERNAME/neon-arcade.git
+git push -u origin main
+# On GitHub → Settings → Pages → Build from branch: main /(root)
+# Your site: https://YOUR_USERNAME.github.io/neon-arcade/</code></pre>
+        <button class="btn" data-copy="#gh-cmds">Copy commands</button>
+      </div>
+
+      <div class="glass" style="margin-bottom:16px">
+        <h4>Netlify — Drag & Drop</h4>
+        <ol>
+          <li>Build your folder with <span class="kbd">index.html</span>, <span class="kbd">game1.html</span>, <span class="kbd">game2.html</span>, assets.</li>
+          <li>Go to Netlify → <em>Deploys</em> → Drag your folder.</li>
+          <li>Done. You get a URL like <code>https://your-site.netlify.app</code>.</li>
+        </ol>
+      </div>
+
+      <div class="glass">
+        <h4>Vercel — From Git</h4>
+        <pre><code id="vercel-cmds"># Install vercel CLI (optional)
+npm i -g vercel
+vercel login
+vercel --prod  # choose the current folder
+# Or connect the GitHub repo in vercel.com dashboard</code></pre>
+        <button class="btn" data-copy="#vercel-cmds">Copy commands</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tabs: ABOUT -->
+  <section class="panel" id="tab-about" aria-hidden="true">
+    <div class="section">
+      <div class="glass">
+        <h3 style="margin-top:0">About TMDC Neon Arcade</h3>
+        <p>Lightweight, responsive, and built for instant‑play HTML games. Duplicate a card in the <strong>Games</strong> tab to add more titles. Replace text and links to match your project. All styles are embedded for one‑file deploys.</p>
+        <ul class="tiny">
+          <li>No external dependencies.</li>
+          <li>Mobile‑friendly grid and buttons.</li>
+          <li>Preview button opens the game in an in‑page frame (useful for quick checks).</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="foot">
+      <div>© <span id="year"></span> TMDC • Neon Arcade</div>
+      <div class="tiny">Built for Lucas • Make cool stuff ✨</div>
+    </div>
+  </footer>
+</div>
+
+<!-- Lightweight preview modal -->
+<dialog id="preview" style="width:min(1000px,92vw);height:min(720px,84vh);border:1px solid #22304f;border-radius:16px;background:var(--panel-strong);color:var(--text);box-shadow:0 30px 80px #000a;">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid #22304f;background:#0d1424;border-top-left-radius:16px;border-top-right-radius:16px">
+    <strong>Preview</strong>
+    <button class="btn" id="closePrev" style="flex:none;width:auto">✕ Close</button>
+  </div>
+  <iframe id="frame" title="Game Preview" style="width:100%;height:calc(100% - 46px);border:0;background:#000"></iframe>
+</dialog>
+
+<script>
+  // Tabs
+  const tabs = document.querySelectorAll('.tab');
+  const panels = document.querySelectorAll('.panel');
+  tabs.forEach(btn=>btn.addEventListener('click',()=>{
+    tabs.forEach(b=>b.setAttribute('aria-selected','false'));
+    panels.forEach(p=>p.setAttribute('aria-hidden','true'));
+    btn.setAttribute('aria-selected','true');
+    document.getElementById(btn.getAttribute('aria-controls')).setAttribute('aria-hidden','false');
+    window.scrollTo({top:0,behavior:'smooth'});
+  }));
+
+  // Copy buttons
+  document.querySelectorAll('[data-copy]').forEach(b=>{
+    b.addEventListener('click',()=>{
+      const sel = b.getAttribute('data-copy');
+      const el = document.querySelector(sel);
+      navigator.clipboard.writeText(el.innerText).then(()=>{
+        b.textContent = 'Copied ✔';
+        setTimeout(()=>b.textContent='Copy commands',1200);
+      });
+    });
+  });
+
+  // Preview dialog
+  const dlg = document.getElementById('preview');
+  const frame = document.getElementById('frame');
+  document.querySelectorAll('[data-preview]').forEach(a=>{
+    a.addEventListener('click',e=>{
+      e.preventDefault();
+      frame.src = a.getAttribute('data-preview');
+      if(typeof dlg.showModal==='function') dlg.showModal(); else dlg.setAttribute('open','');
+    });
+  });
+  document.getElementById('closePrev').addEventListener('click',()=>{
+    frame.src='about:blank';
+    if(dlg.close) dlg.close(); else dlg.removeAttribute('open');
+  });
+
+  // Year
+  document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+</body>
+</html>
