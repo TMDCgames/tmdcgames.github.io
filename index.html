@@ -216,7 +216,7 @@ iframe#frame{width:100%;height:calc(100vh - 180px);border:0;background:#000}
       <h2>Contact Us</h2>
       <p class="note">Have a bug, idea, or business inquiry? Send us a message. This form will use your email app by default. If you prefer direct sending, add EmailJS keys (see code comment) and it’ll send silently.</p>
 
-      <form id="contactForm" action="https://formsubmit.co/tmdcgameshelp@gmail.com" method="POST">
+      <form id="contactForm">
         <div class="field">
           <label for="name">Name</label>
           <input id="name" name="name" autocomplete="name" required>
@@ -251,6 +251,7 @@ iframe#frame{width:100%;height:calc(100vh - 180px);border:0;background:#000}
     <iframe id="frame" title="Game preview"></iframe>
   </dialog>
 
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@2/dist/email.min.js"></script>
 <script>
     // ---- Tabs (accessible) ----
     const tabs = document.querySelectorAll('.tab');
@@ -275,11 +276,15 @@ iframe#frame{width:100%;height:calc(100vh - 180px);border:0;background:#000}
     });
     document.getElementById('closePrev').addEventListener('click',()=>{ frame.src='about:blank'; dlg.close(); });
 
+    
     // ---- Contact form ----
     const EMAIL = "tmdcgameshelp@gmail.com";
-    // Optional EmailJS (uncomment + fill in keys for silent sending)
-    // const EMAILJS = { service:"", template:"", publicKey:"" };
-    // emailjs.init(EMAILJS.publicKey);
+    // EmailJS configuration – replace the placeholders with your own keys.
+    const EMAILJS = { service: '<YOUR_SERVICE_ID>', template: '<YOUR_TEMPLATE_ID>', publicKey: '<YOUR_PUBLIC_KEY>' };
+    // Initialize EmailJS if keys are provided
+    if (EMAILJS.publicKey && EMAILJS.publicKey !== '<YOUR_PUBLIC_KEY>') {
+      emailjs.init(EMAILJS.publicKey);
+    }
 
     const f = document.getElementById('contactForm');
     const note = document.getElementById('formNote');
@@ -288,25 +293,43 @@ iframe#frame{width:100%;height:calc(100vh - 180px);border:0;background:#000}
     function buildMailto(){
       const name = encodeURIComponent(f.name.value.trim());
       const from = encodeURIComponent(f.email.value.trim());
-      const topic = encodeURIComponent(f.topic.value.trim() || "Contact");
+      const topic = encodeURIComponent(f.topic.value.trim() || 'Contact');
       const msg = encodeURIComponent(f.message.value.trim());
       const subject = `${topic} — ${name}`;
-      const body = `From: ${name} <${from}>\n\n${msg}`;
+      const body = `From: ${name} <${from}>
+
+${msg}`;
       return `mailto:${EMAIL}?subject=${subject}&body=${body}`;
     }
 
-    mailtoBtn.addEventListener('click', ()=> {
+    mailtoBtn.addEventListener('click', () => {
       window.location.href = buildMailto();
     });
 
-    f.addEventListener('submit', (e)=>{ // Let the browser handle form submission via FormSubmit
-      // If EmailJS keys were provided, you can enable this block:
-      /*
-      try{
-        await emailjs.send(EMAILJS.service, EMAILJS.template, {
-          from_name: f.name.value, reply_to: f.email.value,
-          topic: f.topic.value || "Contact", message: f.message.value
-        });
+    f.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      // If EmailJS keys are provided (replace placeholders), send via EmailJS
+      if (EMAILJS.service !== '<YOUR_SERVICE_ID>' && EMAILJS.template !== '<YOUR_TEMPLATE_ID>' && EMAILJS.publicKey !== '<YOUR_PUBLIC_KEY>') {
+        try {
+          await emailjs.send(EMAILJS.service, EMAILJS.template, {
+            from_name: f.name.value,
+            reply_to: f.email.value,
+            topic: f.topic.value || 'Contact',
+            message: f.message.value
+          });
+          note.textContent = 'Message sent. Thank you!';
+          note.style.color = 'var(--good)';
+          f.reset();
+          return;
+        } catch(err) {
+          // If EmailJS fails, fall back to mailto
+        }
+      }
+      // Fallback: open mail app with prefilled message
+      window.location.href = buildMailto();
+      note.textContent = 'Opening your mail app…';
+    });
+
         note.textContent = "Message sent. Thank you!";
         note.style.color = "var(--good)";
         f.reset(); return;
