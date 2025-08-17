@@ -214,7 +214,7 @@ iframe#frame{width:100%;height:calc(100vh - 180px);border:0;background:#000}
     <!-- CONTACT -->
     <section class="panel" id="tab-contact" aria-hidden="true">
       <h2>Contact Us</h2>
-      <p class="note">Have a bug, idea, or business inquiry? Send us a message. This form will use your email app by default. If you prefer direct sending, add EmailJS keys (see code comment) and it’ll send silently.</p>
+      <p class="note">Have a bug, idea, or business inquiry? Send us a message. This form sends directly to us via EmailJS. If it fails, it will fallback to your email app.</p>
 
       <form id="contactForm">
         <div class="field">
@@ -306,28 +306,26 @@ ${msg}`;
       window.location.href = buildMailto();
     });
 
-    f.addEventListener('submit', async (e) => {
+    f.addEventListener('submit', (e) => {
       e.preventDefault();
-      // If EmailJS keys are provided (replace placeholders), send via EmailJS
+      // Prefer EmailJS: send the form using sendForm API when keys are provided
       if (EMAILJS.service && EMAILJS.template && EMAILJS.publicKey) {
-        try {
-          await emailjs.send(EMAILJS.service, EMAILJS.template, {
-            from_name: f.name.value,
-            reply_to: f.email.value,
-            topic: f.topic.value || 'Contact',
-            message: f.message.value
+        emailjs.sendForm(EMAILJS.service, EMAILJS.template, f)
+          .then(() => {
+            note.textContent = 'Message sent. Thank you!';
+            note.style.color = 'var(--good)';
+            f.reset();
+          })
+          .catch(() => {
+            // fallback to mailto if EmailJS fails
+            window.location.href = buildMailto();
+            note.textContent = 'Opening your mail app…';
           });
-          note.textContent = 'Message sent. Thank you!';
-          note.style.color = 'var(--good)';
-          f.reset();
-          return;
-        } catch(err) {
-          // If EmailJS fails, fall back to mailto
-        }
+      } else {
+        // fallback to mailto if keys are missing
+        window.location.href = buildMailto();
+        note.textContent = 'Opening your mail app…';
       }
-      // Fallback: open mail app with prefilled message
-      window.location.href = buildMailto();
-      note.textContent = 'Opening your mail app…';
     });
 </script>
 </body>
