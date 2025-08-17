@@ -167,41 +167,41 @@ iframe#frame{width:100%;height:calc(100vh - 180px);border:0;background:#000}
           </div>
         </article>
 
-        <!-- Neon Runner -->
-  <div class="thumb"></div>
-  <div class="badges">
-    <span class="badge">New</span>
-    <span class="badge">Endless</span>
-  </div>
-  <div class="info">
-    <h3>Neon Runner</h3>
-    <p class="desc">Dash through glowing obstacles, upgrade speed, chase high scores.</p>
-    <div class="meta"><span class="pill">Runner</span><span class="pill">Arcade</span></div>
-  </div>
-  <div class="actions">
-    <a class="btn primary" href="game4.html" target="_blank" rel="noopener">▶ Play</a>
-    <a class="btn" href="#" data-preview="game4.html"> Preview</a>
-  </div>
-</article>
+        <!-- Neon Runner (FIXED: wrapped in article.card) -->
+        <article class="card">
+          <div class="thumb"></div>
+          <div class="badges">
+            <span class="badge">New</span>
+            <span class="badge">Endless</span>
+          </div>
+          <div class="info">
+            <h3>Neon Runner</h3>
+            <p class="desc">Dash through glowing obstacles, upgrade speed, chase high scores.</p>
+            <div class="meta"><span class="pill">Runner</span><span class="pill">Arcade</span></div>
+          </div>
+          <div class="actions">
+            <a class="btn primary" href="game4.html" target="_blank" rel="noopener">▶ Play</a>
+            <a class="btn" href="#" data-preview="game4.html">👁 Preview</a>
+          </div>
+        </article>
 
-<!-- Neon Parkour Rush -->
-<article class="card">
-  <div class="thumb"></div>
-  <div class="badges">
-    <span class="badge">Coming Soon</span>
-    <span class="badge">Endless</span>
-  </div>
-  <div class="info">
-    <h3>Neon Parkour Rush</h3>
-    <p class="desc">Leap across neon rooftops, slide under beams, and master precision timing.</p>
-    <div class="meta"><span class="pill">Parkour</span><span class="pill">Arcade</span></div>
-  </div>
-  <div class="actions">
-    <a class="btn primary" href="#">ℹ Teaser</a>
-    <a class="btn" href="#" data-preview="#"> Preview</a>
-  </div>
-</article>
-
+        <!-- Neon Parkour Rush -->
+        <article class="card">
+          <div class="thumb"></div>
+          <div class="badges">
+            <span class="badge">Coming Soon</span>
+            <span class="badge">Endless</span>
+          </div>
+          <div class="info">
+            <h3>Neon Parkour Rush</h3>
+            <p class="desc">Leap across neon rooftops, slide under beams, and master precision timing.</p>
+            <div class="meta"><span class="pill">Parkour</span><span class="pill">Arcade</span></div>
+          </div>
+          <div class="actions">
+            <a class="btn primary" href="#">ℹ Teaser</a>
+            <a class="btn" href="#" data-preview="#">👁 Preview</a>
+          </div>
+        </article>
       </div>
     </section>
 
@@ -224,7 +224,7 @@ iframe#frame{width:100%;height:calc(100vh - 180px);border:0;background:#000}
 
       <div style="margin-top:18px;border:1px solid var(--border);border-radius:14px;padding:14px;background:rgba(255,255,255,.04)">
         <h3>Values</h3>
-        <p class="desc">Innovation • eativity • Accessibility • Respect</p>
+        <p class="desc">Innovation • Creativity • Accessibility • Respect</p>
         <p class="note">We don’t hide trackers or collect unnecessary data. Players first, always.</p>
       </div>
 
@@ -236,7 +236,6 @@ iframe#frame{width:100%;height:calc(100vh - 180px);border:0;background:#000}
       <p class="note">Have a bug, idea, or business inquiry? Send us a message. This form sends directly to us via EmailJS. If it fails, it will fallback to your email app.</p>
 
       <form id="contactForm">
-
         <div class="field">
           <label for="name">Name</label>
           <input id="name" name="name" autocomplete="name" required>
@@ -260,7 +259,8 @@ iframe#frame{width:100%;height:calc(100vh - 180px);border:0;background:#000}
         <p id="formNote" class="note" aria-live="polite"></p>
       </form>
     </section>
-  </mai
+  </main> <!-- FIXED: closed properly -->
+
   <!-- Preview dialog -->
   <dialog id="preview">
     <div class="dlgbar">
@@ -272,80 +272,71 @@ iframe#frame{width:100%;height:calc(100vh - 180px);border:0;background:#000}
 
 <script src="https://cdn.jsdelivr.net/npm/emailjs-com@2/dist/email.min.js"></script>
 <script>
-    // ---- Tabs (accessible) ----
-    const tabs = document.querySelectorAll('.tab');
-    const panels = document.querySelectorAll('.panel');
-    function activate(id){
-      tabs.forEach(b=>{b.setAttribute('aria-selected','false')});
-      panels.forEach(p=>p.setAttribute('aria-hidden','true'));
-      document.querySelector(`[aria-controls="${id}"]`).setAttribute('aria-selected','true');
-      document.getElementById(id).setAttribute('aria-hidden','false');
-      window.scrollTo({top:0,behavior:'smooth'});
-    }
-    tabs.forEach(btn=>btn.addEventListener('click',()=>activate(btn.getAttribute('aria-controls'))));
+  // ---- Tabs (accessible) ----
+  const tabs = document.querySelectorAll('.tab');
+  const panels = document.querySelectorAll('.panel');
+  function activate(id){
+    tabs.forEach(b=>{b.setAttribute('aria-selected','false')});
+    panels.forEach(p=>p.setAttribute('aria-hidden','true'));
+    document.querySelector(`[aria-controls="${id}"]`).setAttribute('aria-selected','true');
+    document.getElementById(id).setAttribute('aria-hidden','false');
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  tabs.forEach(btn=>btn.addEventListener('click',()=>activate(btn.getAttribute('aria-controls'))));
 
-    // ---- Preview modal ----
-    const dlg = document.getElementById('preview');
-    const frame = document.getElementById('frame');
-    document.querySelectorAll('[data-preview]').forEach(a=>{
-      a.addEventListener('click',e=>{
-        frame.src = a.getAttribute('data-preview');
-        dlg.showModal();
-      });
-    });
-    document.getElementById('closePrev').addEventListener('click',()=>{ frame.src='about:blank'; dlg.close(); });
-
-    
-    // ---- Contact form ----
-    const EMAIL = "tmdcgameshelp@gmail.com";
-    // EmailJS configuration – replace the placeholders with your own keys.
-    const EMAILJS = { service: 'service_jz4cvxf', template: 'template_dokxss8', publicKey: 'WgRcw9Dm8lTOokPI' };
-    // Initialize EmailJS if keys are provided
-    if (EMAILJS.publicKey) {
-      emailjs.init(EMAILJS.publicKey);
-    }
-
-    const f = document.getElementById('contactForm');
-    const note = document.getElementById('formNote');
-    const mailtoBtn = document.getElementById('mailtoBtn');
-
-    function buildMailto(){
-      const name = encodeURIComponent(f.name.value.trim());
-      const from = encodeURIComponent(f.email.value.trim());
-      const topic = encodeURIComponent(f.topic.value.trim() || 'Contact');
-      const msg = encodeURIComponent(f.message.value.trim());
-      const subject = `${topic} — ${name}`;
-      const body = `From: ${name} <${from}>
-
-${msg}`;
-      return `mailto:${EMAIL}?subject=${subject}&body=${body}`;
-    }
-
-    mailtoBtn.addEventListener('click', () => {
-      window.location.href = buildMailto();
-    });
-
-    f.addEventListener('submit', (e) => {
+  // ---- Preview modal ----
+  const dlg = document.getElementById('preview');
+  const frame = document.getElementById('frame');
+  document.querySelectorAll('[data-preview]').forEach(a=>{
+    a.addEventListener('click',e=>{
       e.preventDefault();
-      // Prefer EmailJS: send the form using sendForm API when keys are provided
-      if (EMAILJS.service && EMAILJS.template && EMAILJS.publicKey) {
-        emailjs.sendForm(EMAILJS.service, EMAILJS.template, f)
-          .then(() => {
-            note.textContent = 'Message sent. Thank you!';
-            note.style.color = 'var(--good)';
-            f.reset();
-          })
-          .catch(() => {
-            // fallback to mailto if EmailJS fails
-            window.location.href = buildMailto();
-            note.textContent = 'Opening your mail app…';
-          });
-      } else {
-        // fallback to mailto if keys are missing
-        window.location.href = buildMailto();
-        note.textContent = 'Opening your mail app…';
-      }
+      frame.src = a.getAttribute('data-preview');
+      dlg.showModal();
     });
+  });
+  document.getElementById('closePrev').addEventListener('click',()=>{ frame.src='about:blank'; dlg.close(); });
+
+  // ---- Contact form ----
+  const EMAIL = "tmdcgameshelp@gmail.com";
+  const EMAILJS = { service: 'service_jz4cvxf', template: 'template_dokxss8', publicKey: 'WgRcw9Dm8lTOokPI' };
+  if (EMAILJS.publicKey) { emailjs.init(EMAILJS.publicKey); }
+
+  const f = document.getElementById('contactForm');
+  const note = document.getElementById('formNote');
+  const mailtoBtn = document.getElementById('mailtoBtn');
+
+  function buildMailto(){
+    const name = encodeURIComponent(f.name.value.trim());
+    const from = encodeURIComponent(f.email.value.trim());
+    const topic = encodeURIComponent(f.topic.value.trim() || 'Contact');
+    const msg = encodeURIComponent(f.message.value.trim());
+    const subject = `${topic} — ${name}`;
+    const body = `From: ${name} <${from}>\n\n${msg}`;
+    return `mailto:${EMAIL}?subject=${subject}&body=${body}`;
+  }
+
+  mailtoBtn.addEventListener('click', () => {
+    window.location.href = buildMailto();
+  });
+
+  f.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (EMAILJS.service && EMAILJS.template && EMAILJS.publicKey) {
+      emailjs.sendForm(EMAILJS.service, EMAILJS.template, f)
+        .then(() => {
+          note.textContent = 'Message sent. Thank you!';
+          note.style.color = 'var(--good)';
+          f.reset();
+        })
+        .catch(() => {
+          window.location.href = buildMailto();
+          note.textContent = 'Opening your mail app…';
+        });
+    } else {
+      window.location.href = buildMailto();
+      note.textContent = 'Opening your mail app…';
+    }
+  });
 </script>
 </body>
 </html>
