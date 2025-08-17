@@ -10,10 +10,6 @@
     --bg:#05060d; --bg2:#0a0e1b; --glass:rgba(255,255,255,.06); --text:#eaf2ff;
     --glow:#6bf3ff; --glow2:#7a5cff; --muted:#a9b7d0; --shadow:0 12px 60px rgba(0,0,0,.5);
   }
-  [data-theme="light"]{
-    --bg:#f5f7ff; --bg2:#e9ecf5; --glass:rgba(0,0,0,.08); --text:#1a1c22;
-    --glow:#4a80ff; --glow2:#7a5cff; --muted:#4a4f63; --shadow:0 6px 20px rgba(0,0,0,.15);
-  }
   *{box-sizing:border-box;margin:0;padding:0}
   body{min-height:100vh;background:linear-gradient(180deg,var(--bg),var(--bg2));color:var(--text);
        font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;display:flex;flex-direction:column;transition:background .3s,color .3s}
@@ -39,8 +35,6 @@
   .tab{padding:10px 14px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid var(--glass);cursor:pointer;font-size:.9rem;transition:.25s;color:#fff}
   .tab[aria-selected="true"],.tab:hover{background:#fff;color:#000;box-shadow:0 0 10px #fff8}
 
-  .toggle{margin-left:12px;padding:8px 12px;border-radius:8px;border:1px solid var(--glass);cursor:pointer;background:rgba(255,255,255,.12);color:#fff;font-size:.8rem}
-
   .hero{padding:40px 16px;text-align:center}
   .hero .title{font-size:2.6rem;margin-bottom:10px}
   .glowtxt{background:linear-gradient(90deg,var(--glow),var(--glow2));-webkit-background-clip:text;color:transparent}
@@ -50,7 +44,7 @@
   .panel{display:none}
   .panel[aria-hidden="false"]{display:block}
 
-.grid{display:grid;gap:20px;padding:30px 16px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));max-width:1100px;margin:0 auto}
+  .grid{display:grid;gap:20px;padding:30px 16px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));max-width:1100px;margin:0 auto}
   .card{border:1px solid var(--glass);border-radius:20px;background:rgba(255,255,255,.05);overflow:hidden;transition:.25s;box-shadow:var(--shadow)}
   .card:hover{transform:translateY(-6px);box-shadow:0 18px 60px rgba(0,0,0,.55)}
 
@@ -80,6 +74,49 @@
 
   footer{margin-top:auto;background:#0a0e16aa;border-top:1px solid var(--glass);backdrop-filter:blur(8px)}
   .foot{max-width:1150px;margin:0 auto;padding:18px 16px;display:flex;justify-content:space-between;flex-wrap:wrap;color:#9fb3d6;font-size:.9rem}
+
+  /* ===== About "hero+stats" layout (isolated styles) ===== */
+  .about-hero-pro{
+    margin:28px auto 40px; max-width:1150px; padding:22px;
+    background:linear-gradient(135deg,#4a7bff 0%, #8b5cff 100%);
+    border-radius:22px; border:1px solid rgba(255,255,255,.18);
+    box-shadow:0 18px 60px rgba(0,0,0,.45);
+  }
+  .about-hero-pro .inner{
+    display:grid; grid-template-columns: 1.1fr .9fr; gap:22px;
+  }
+  .about-hero-pro .lead{
+    background:rgba(255,255,255,.10);
+    border:1px solid rgba(255,255,255,.22);
+    border-radius:16px; padding:24px;
+    color:#fff;
+  }
+  .about-hero-pro h2{font-size:2rem; margin:0 0 10px}
+  .about-hero-pro p{font-size:1.05rem; line-height:1.6; opacity:.96}
+  .about-hero-pro .email{
+    display:inline-block; margin-top:16px; padding:10px 16px; border-radius:12px;
+    background:#fff; color:#111; font-weight:700; box-shadow:0 6px 26px rgba(0,0,0,.25);
+  }
+  .stat-grid{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:16px;
+  }
+  .stat{
+    background:rgba(0,0,0,.18); border:1px solid rgba(255,255,255,.22);
+    border-radius:16px; padding:18px; color:#fff;
+    backdrop-filter: blur(6px);
+  }
+  .stat h3{font-size:1.8rem; line-height:1; margin:2px 0 6px}
+  .stat small{opacity:.9}
+  .stat em{display:block;font-style:normal; font-size:.85rem; opacity:.85}
+
+  /* mobile tweaks */
+  @media (max-width: 860px){
+    .about-hero-pro .inner{grid-template-columns:1fr; gap:16px}
+    .stat-grid{grid-template-columns:repeat(3,1fr)}
+  }
+  @media (max-width: 560px){
+    .stat-grid{grid-template-columns:repeat(2,1fr)}
+  }
 </style>
 </head>
 <body>
@@ -105,7 +142,6 @@
     <nav role="tablist">
       <button class="tab" role="tab" aria-controls="tab-games" aria-selected="true">Games</button>
       <button class="tab" role="tab" aria-controls="tab-about" aria-selected="false">About</button>
-      <button class="toggle" id="themeToggle">☀️/🌙</button>
     </nav>
   </div>
 </header>
@@ -126,9 +162,9 @@
       </div>
       <div class="info">
         <h3>BlockGun</h3>
-        <p class="desc">Physics‑driven shooter with destructible blocks and boss fights.</p>
+        <p class="desc">Physics-driven shooter with destructible blocks and boss fights.</p>
         <div class="meta">
-          <span class="pill">Arcade</span><span class="pill">Single‑player</span><span class="pill">HTML5</span>
+          <span class="pill">Arcade</span><span class="pill">Single-player</span><span class="pill">HTML5</span>
         </div>
         <div class="actions">
           <a class="btn primary" href="game1.html" target="_blank" rel="noopener">▶ Play</a>
@@ -145,7 +181,7 @@
       </div>
       <div class="info">
         <h3>Star Skirmish</h3>
-        <p class="desc">High‑velocity space battles. Dodge, upgrade, and clash in neon starfields.</p>
+        <p class="desc">High-velocity space battles. Dodge, upgrade, and clash in neon starfields.</p>
         <div class="meta">
           <span class="pill">Shooter</span><span class="pill">Wave mode</span><span class="pill">WebGL/Canvas</span>
         </div>
@@ -160,25 +196,52 @@
 
 <!-- About Tab -->
 <section class="panel" id="tab-about" aria-hidden="true">
-  <div class="about-hero">
-    <h2>TheMillionDollarCompany (TMDC)</h2>
-    <p>TheMillionDollarCompany is a fresh, ambitious game development studio focused on creating accessible, browser-based entertainment through HTML games. Founded by two passionate developers, Lucas and Gabriel, TMDC thrives on innovation, creativity, and the belief that great gameplay should be available to everyone, anywhere, with just a click.</p>
-    <a href="mailto:tmdcgameshelp@gmail.com" class="email-btn">📧 Email TMDC</a>
-  </div>
-  <div class="about-grid">
-    <div class="about-card">
-      <h3>Our Mission</h3>
-      <p>To craft addictive, high‑quality HTML games that can be played instantly—no downloads, no barriers. We want to bring gaming back to its roots: easy to start, hard to put down.</p>
-    </div>
-    <div class="about-card">
-      <h3>Our Values</h3>
-      <div class="chips">
-        <span class="chip">Innovation</span><span class="chip">Creativity</span><span class="chip">Accessibility</span><span class="chip">Privacy &amp; Respect</span>
+
+  <!-- Gradient hero with stats -->
+  <div class="about-hero-pro">
+    <div class="inner">
+      <!-- Left: blurb -->
+      <div class="lead">
+        <h2>TheMillionDollarCompany (TMDC)</h2>
+        <p>We’re a fresh, ambitious studio building accessible, browser-based games. Founded by Lucas &amp; Gabriel, we believe great gameplay should be one click away for everyone, everywhere.</p>
+        <a href="mailto:tmdcgameshelp@gmail.com" class="email">📧 Email TMDC</a>
+      </div>
+
+      <!-- Right: stat tiles -->
+      <div class="stat-grid">
+        <div class="stat">
+          <h3>2</h3>
+          <small>Founders</small>
+        </div>
+        <div class="stat">
+          <h3>2+</h3>
+          <small>Playable titles</small>
+        </div>
+        <div class="stat">
+          <h3>100%</h3>
+          <small>Browser-first</small>
+        </div>
       </div>
     </div>
+  </div>
+
+  <!-- Keep your existing cards below -->
+  <div class="about-grid">
     <div class="about-card">
-      <h3>Looking Ahead</h3>
-      <p>TheMillionDollarCompany is just getting started. With every update, expansion, and new title, we’re building a universe of games that reflects our vision: fun, creative, and limitless.</p>
+      <h3>About Us</h3>
+      <p>We craft fast, fun web games that blend nostalgia with modern design. Every project balances simplicity with depth so players keep discovering new moments of joy.</p>
+    </div>
+    <div class="about-card">
+      <h3>Mission</h3>
+      <p>Create high-quality HTML games that are instant to play — no installs, no barriers — just jump in and have fun.</p>
+    </div>
+    <div class="about-card">
+      <h3>Values</h3>
+      <div class="chips">
+        <span class="chip">Innovation</span><span class="chip">Creativity</span>
+        <span class="chip">Accessibility</span><span class="chip">Privacy &amp; Respect</span>
+      </div>
+      <p style="margin-top:10px; color:var(--muted)">We don’t hide trackers or collect unnecessary data. Players first, always.</p>
     </div>
   </div>
 </section>
@@ -217,15 +280,6 @@
   document.getElementById('closePrev').addEventListener('click',()=>{frame.src='about:blank';dlg.close();});
 
   document.getElementById('year').textContent=new Date().getFullYear();
-
-  const toggle=document.getElementById('themeToggle');
-  toggle.addEventListener('click',()=>{
-    if(document.body.getAttribute('data-theme')==='light'){
-      document.body.removeAttribute('data-theme');
-    }else{
-      document.body.setAttribute('data-theme','light');
-    }
-  });
 </script>
 </body>
 </html>
