@@ -29,10 +29,13 @@
   <main class="panel">
     <h1><span class="glow">Neon Runner</span> — Coming Soon</h1>
     <p>Endless speed, tight controls, juicy VFX. We’re polishing obstacles, power-ups, and the score chase loop.</p>
-    <p>Want early access or to suggest ideas? <a class="btn" href="index.html#tab-contact" target="_top">Contact us</a></p>
+    <!-- Updated contact link: when opened in the preview iframe this will call the parent page's
+         tab activation function and close the modal. If that fails, it will fall back to navigating
+         the top-level window to the contact tab. The return false prevents the default link action. -->
+    <p>Want early access or to suggest ideas? <a class="btn" href="index.html#tab-contact"
+      onclick="try{parent.activate('tab-contact'); parent.document.getElementById('closePrev').click();}catch(e){window.top.location.href='index.html#tab-contact';} return false;">Contact us</a></p>
     <div class="progress"></div>
     <a class="btn" href="index.html">← Back to Arcade</a>
   </main>
-
 </body>
 </html>
