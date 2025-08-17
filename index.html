@@ -1,290 +1,289 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>TMDC • Neon Arcade</title>
-  <meta name="description" content="Play TMDC Games — BlockGun and Star Skirmish, a modern arcade built for the browser." />
-  <style>
-    :root{
-      --bg:#070912; --bg2:#0b1020; --ink:#eaf2ff; --muted:#a9b7d0; --line:rgba(255,255,255,.12);
-      --glow1:#6bf3ff; --glow2:#7a5cff; --accent:#6aa1ff; --good:#4be38a; --warn:#ffd166; --bad:#ff6b6b;
-      --shadow:0 12px 60px rgba(0,0,0,.5);
-      --radius: 16px;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{margin:0;background:radial-gradient(140% 100% at 50% -10%, #122039 0%, var(--bg2) 45%, var(--bg) 100%);
-      color:var(--ink); font:16px/1.55 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale}
-    a{color:inherit; text-decoration:none}
-    img{max-width:100%; display:block}
-    .container{width:min(1100px, 92%); margin:0 auto}
-    .glass{background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
-      border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); backdrop-filter: blur(8px)}
-    .btn{display:inline-flex; gap:.6rem; align-items:center; justify-content:center; padding:.8rem 1.1rem;
-      border:1px solid var(--line); border-radius:999px; background:rgba(255,255,255,.06); cursor:pointer; font-weight:600}
-    .btn:hover{transform:translateY(-1px)}
-    .btn.primary{background:linear-gradient(90deg, var(--glow1), var(--glow2)); color:#091022; border-color:transparent}
-    .tag{font-size:.75rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted)}
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>TMDC • Neon Arcade</title>
+<meta name="description" content="Play TMDC Games — BlockGun and Star Skirmish, a modern arcade built for the browser."/>
+<style>
+  :root{
+    --bg:#05060d; --bg2:#0a0e1b; --glass:rgba(255,255,255,.06); --text:#eaf2ff;
+    --glow:#6bf3ff; --glow2:#7a5cff; --muted:#a9b7d0; --shadow:0 12px 60px rgba(0,0,0,.5);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{min-height:100vh;background:linear-gradient(180deg,var(--bg),var(--bg2));color:var(--text);
+       font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;display:flex;flex-direction:column;transition:background .3s,color .3s}
+  a{color:inherit;text-decoration:none}
 
-    /* ===== Header ===== */
-    header{position:sticky; top:0; z-index:50; backdrop-filter: blur(10px)}
-    .nav{display:flex; align-items:center; justify-content:space-between; padding:.8rem 0}
-    .brand{display:flex; align-items:center; gap:.6rem; font-weight:800; letter-spacing:.02em}
-    .brand-mark{width:28px; height:28px; border-radius:8px; background:conic-gradient(from 230deg, var(--glow2), var(--glow1)); box-shadow:0 0 24px rgba(123,92,255,.5)}
-    .nav-links{display:flex; gap:1rem; align-items:center}
-    .nav-links a{opacity:.9}
-    .nav-links a:focus-visible, .btn:focus-visible{outline:2px solid var(--glow1); outline-offset:2px; border-radius:10px}
+  .nebula{position:fixed;inset:0;z-index:-1;background:
+      radial-gradient(40% 40% at 10% 10%,#6bf3ff22,transparent),
+      radial-gradient(35% 35% at 80% 20%,#7a5cff22,transparent),
+      radial-gradient(60% 60% at 50% 80%,#00ffd51a,transparent);
+      animation:float 20s ease-in-out infinite alternate;filter:blur(40px)}
+  @keyframes float{to{transform:translateY(-40px)}}
 
-    /* Mobile menu */
-    .mobile-toggle{display:none}
-    @media (max-width: 840px){
-      .nav-links{display:none}
-      .mobile-toggle{display:inline-flex}
-      #mobileMenu{display:none; position:fixed; inset:64px 0 auto 0; padding:1rem;}
-      #mobileMenu.open{display:block}
-      #mobileMenu a{display:block; padding:1rem; border-bottom:1px solid var(--line)}
-    }
+  header{position:sticky;top:0;background:rgba(5,8,16,.85);backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--glass);z-index:10}
+  .container{max-width:1150px;margin:0 auto;padding:16px;display:flex;align-items:center;justify-content:space-between}
+  .brand{display:flex;align-items:center;gap:12px}
+  .logo{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;background:#0d1420;border:1px solid #1a2237;box-shadow:inset 0 0 30px #6bf3ff33,inset 0 0 40px #7a5cff33}
+  .logo svg{width:28px;height:28px}
+  .wordmark{display:flex;flex-direction:column;line-height:1}
+  .wordmark .t{font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+  .wordmark .s{font-size:.8rem;color:#9ec8ff;letter-spacing:.12em}
+  nav{display:flex;gap:12px;align-items:center}
+  .tab{padding:10px 14px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid var(--glass);cursor:pointer;font-size:.9rem;transition:.25s;color:#fff}
+  .tab[aria-selected="true"],.tab:hover{background:#fff;color:#000;box-shadow:0 0 10px #fff8}
 
-    /* ===== Hero ===== */
-    .hero{padding: clamp(48px, 8vw, 96px) 0}
-    .hero-grid{display:grid; grid-template-columns: 1.2fr .8fr; gap:2rem; align-items:center}
-    .eyebrow{display:inline-flex; gap:.5rem; align-items:center; background:rgba(255,255,255,.05); border:1px solid var(--line); border-radius:999px; padding:.35rem .7rem}
-    .spark{width:8px; height:8px; border-radius:50%; background:radial-gradient(circle, var(--glow1), transparent 70%); box-shadow:0 0 18px var(--glow1)}
-    h1{font-size: clamp(2rem, 5vw, 3.2rem); line-height:1.1; margin:.8rem 0 1rem}
-    .lead{color:var(--muted); font-size: clamp(1rem, 2.4vw, 1.15rem)}
-    .hero-actions{display:flex; gap:.8rem; flex-wrap:wrap; margin-top:1.2rem}
-    .poster{aspect-ratio: 16/10; border-radius:var(--radius); overflow:hidden; border:1px solid var(--line)}
-    .poster > div{height:100%; background:radial-gradient(80% 60% at 20% 20%, rgba(107,243,255,.25), transparent 40%),
-                              radial-gradient(80% 80% at 90% 20%, rgba(122,92,255,.25), transparent 50%),
-                              linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02))}
+  .hero{padding:40px 16px;text-align:center}
+  .hero .title{font-size:2.6rem;margin-bottom:10px}
+  .glowtxt{background:linear-gradient(90deg,var(--glow),var(--glow2));-webkit-background-clip:text;color:transparent}
+  .subtitle{color:var(--muted);font-size:1.1rem}
 
-    @media (max-width: 940px){
-      .hero-grid{grid-template-columns: 1fr}
-    }
+  /* Panels (hide/show via tabs) */
+  .panel{display:none}
+  .panel[aria-hidden="false"]{display:block}
 
-    /* ===== Sections ===== */
-    section{padding: clamp(28px, 6vw, 64px) 0}
-    .section-title{font-size: clamp(1.3rem, 3.4vw, 2rem); margin:0 0 .6rem}
-    .section-sub{color:var(--muted); margin:0 0 1.2rem}
+  .grid{display:grid;gap:20px;padding:30px 16px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));max-width:1100px;margin:0 auto}
+  .card{border:1px solid var(--glass);border-radius:20px;background:rgba(255,255,255,.05);overflow:hidden;transition:.25s;box-shadow:var(--shadow)}
+  .card:hover{transform:translateY(-6px);box-shadow:0 18px 60px rgba(0,0,0,.55)}
 
-    .cards{display:grid; grid-template-columns:repeat(3, 1fr); gap:1rem}
-    .card{padding:1.1rem; border:1px solid var(--line); border-radius:var(--radius); background:rgba(255,255,255,.04)}
-    .card h3{margin:.2rem 0 .4rem; font-size:1.05rem}
-    .card p{color:var(--muted); margin:0}
-    @media (max-width: 920px){ .cards{grid-template-columns:1fr 1fr} }
-    @media (max-width: 640px){ .cards{grid-template-columns:1fr} }
+  .thumb{height:180px;background:linear-gradient(135deg,#0e1528,#0b0f1c);display:flex;align-items:flex-end;justify-content:space-between;padding:12px;position:relative}
+  .badge{font-size:.7rem;padding:6px 10px;border-radius:999px;background:#0b1326aa;border:1px solid #6bf3ff55;color:#9edbff}
+  .scanline{position:absolute;inset:0;background:linear-gradient(transparent 60%,#6bf3ff12 60%),repeating-linear-gradient(0deg,#fff0 0 14px,#6bf3ff10 15px 15px);mix-blend-mode:screen;opacity:.3}
+  .info{padding:16px}
+  .info h3{margin:0 0 8px;font-size:1.2rem}
+  .desc{margin:0 0 14px;color:var(--muted)}
+  .meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+  .pill{font-size:.7rem;padding:4px 8px;border-radius:999px;background:#0d1424;border:1px solid #ffffff1a}
+  .actions{display:flex;gap:10px}
+  .btn{flex:1;padding:10px;border-radius:12px;border:1px solid #1b263d;background:linear-gradient(180deg,#101a2d,#0f1525);cursor:pointer;display:flex;justify-content:center;align-items:center;transition:.25s;color:var(--text)}
+  .btn.primary{border-color:#2a3b61;box-shadow:0 0 0 2px #6bf3ff22 inset}
+  .btn:hover{filter:brightness(1.08)}
 
-    /* ===== Game list ===== */
-    .game-grid{display:grid; grid-template-columns:repeat(3, 1fr); gap:1rem}
-    .game{display:flex; flex-direction:column; gap:.8rem; padding:.9rem}
-    .thumb{aspect-ratio: 16/9; border-radius:12px; border:1px solid var(--line); overflow:hidden; position:relative}
-    .thumb::after{content:""; position:absolute; inset:0; box-shadow: inset 0 0 60px rgba(0,0,0,.35)}
-    .meta{display:flex; gap:.6rem; align-items:center; color:var(--muted); font-size:.9rem}
-    .meta .dot{width:6px; height:6px; background:var(--glow1); border-radius:50%; box-shadow:0 0 10px var(--glow1)}
-    .game .actions{display:flex; gap:.6rem; flex-wrap:wrap}
+  .about-hero{padding:50px 20px;text-align:center;background:linear-gradient(135deg,var(--glow)33%,var(--glow2)77%);color:#fff;border-radius:20px;margin-bottom:40px}
+  .about-hero h2{font-size:2rem;margin-bottom:10px}
+  .about-hero p{font-size:1.1rem;max-width:700px;margin:0 auto}
+  .about-hero .email-btn{display:inline-block;margin-top:20px;padding:12px 20px;border-radius:10px;background:#fff;color:#000;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,.2);transition:.25s}
+  .about-hero .email-btn:hover{background:#f0f0f0;transform:translateY(-2px)}
+  .about-grid{display:grid;gap:20px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));margin-top:30px}
+  .about-card{padding:20px;border-radius:16px;background:rgba(255,255,255,.08);border:1px solid var(--glass);box-shadow:var(--shadow)}
+  .about-card h3{margin-bottom:10px;font-size:1.2rem}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{background:rgba(255,255,255,.15);padding:4px 10px;border-radius:999px;font-size:.8rem}
 
-    @media (max-width: 920px){ .game-grid{grid-template-columns:1fr 1fr} }
-    @media (max-width: 640px){ .game-grid{grid-template-columns:1fr} }
+  footer{margin-top:auto;background:#0a0e16aa;border-top:1px solid var(--glass);backdrop-filter:blur(8px)}
+  .foot{max-width:1150px;margin:0 auto;padding:18px 16px;display:flex;justify-content:space-between;flex-wrap:wrap;color:#9fb3d6;font-size:.9rem}
 
-    /* ===== Contact ===== */
-    form{display:grid; gap:.8rem}
-    input, textarea{width:100%; padding:.9rem 1rem; border-radius:12px; border:1px solid var(--line); background:rgba(255,255,255,.04); color:var(--ink)}
-    textarea{min-height:120px; resize:vertical}
-    .chip-row{display:flex; flex-wrap:wrap; gap:.5rem}
-    .chip{padding:.4rem .7rem; border:1px solid var(--line); border-radius:999px; background:rgba(255,255,255,.05); cursor:pointer}
+  /* ===== About "hero+stats" layout (isolated styles) ===== */
+  .about-hero-pro{
+    margin:28px auto 40px; max-width:1150px; padding:22px;
+    background:linear-gradient(135deg,#4a7bff 0%, #8b5cff 100%);
+    border-radius:22px; border:1px solid rgba(255,255,255,.18);
+    box-shadow:0 18px 60px rgba(0,0,0,.45);
+  }
+  .about-hero-pro .inner{
+    display:grid; grid-template-columns: 1.1fr .9fr; gap:22px;
+  }
+  .about-hero-pro .lead{
+    background:rgba(255,255,255,.10);
+    border:1px solid rgba(255,255,255,.22);
+    border-radius:16px; padding:24px;
+    color:#fff;
+  }
+  .about-hero-pro h2{font-size:2rem; margin:0 0 10px}
+  .about-hero-pro p{font-size:1.05rem; line-height:1.6; opacity:.96}
+  .about-hero-pro .email{
+    display:inline-block; margin-top:16px; padding:10px 16px; border-radius:12px;
+    background:#fff; color:#111; font-weight:700; box-shadow:0 6px 26px rgba(0,0,0,.25);
+  }
+  .stat-grid{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:16px;
+  }
+  .stat{
+    background:rgba(0,0,0,.18); border:1px solid rgba(255,255,255,.22);
+    border-radius:16px; padding:18px; color:#fff;
+    backdrop-filter: blur(6px);
+  }
+  .stat h3{font-size:1.8rem; line-height:1; margin:2px 0 6px}
+  .stat small{opacity:.9}
+  .stat em{display:block;font-style:normal; font-size:.85rem; opacity:.85}
 
-    /* ===== Footer ===== */
-    footer{padding:28px 0 48px; color:var(--muted); border-top:1px solid var(--line)}
-
-    /* ===== Tiny animations ===== */
-    .float{animation:float 6s ease-in-out infinite}
-    @keyframes float{0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)}}
-  </style>
+  /* mobile tweaks */
+  @media (max-width: 860px){
+    .about-hero-pro .inner{grid-template-columns:1fr; gap:16px}
+    .stat-grid{grid-template-columns:repeat(3,1fr)}
+  }
+  @media (max-width: 560px){
+    .stat-grid{grid-template-columns:repeat(2,1fr)}
+  }
+</style>
 </head>
 <body>
-  <!-- ===== Header ===== -->
-  <header class="glass">
-    <div class="container nav" role="navigation" aria-label="Main">
-      <a href="#" class="brand" aria-label="TMDC Home">
-        <span class="brand-mark" aria-hidden="true"></span>
-        <span>TMDC</span>
-      </a>
-      <nav class="nav-links" aria-label="Primary">
-        <a href="#games">Games</a>
-        <a href="#features">Features</a>
-        <a href="#about">About</a>
-        <a href="#contact">Contact</a>
-        <a href="#" class="btn primary">Play Now</a>
-      </nav>
-      <button class="btn mobile-toggle" id="menuBtn" aria-controls="mobileMenu" aria-expanded="false" aria-label="Open menu">☰</button>
+<div class="nebula"></div>
+<header>
+  <div class="container">
+    <div class="brand">
+      <div class="logo">
+        <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+          <circle class="glowring" cx="32" cy="32" r="22" stroke="#6bf3ff" stroke-width="2" opacity=".8"/>
+          <rect x="16" y="26" width="32" height="12" rx="6" fill="#0ef" opacity=".18" stroke="#7ad"/>
+          <circle cx="24" cy="32" r="2.8" fill="#6bf3ff"/>
+          <rect x="28" y="30.2" width="6" height="3.6" rx="1.2" fill="#9edbff"/>
+          <circle cx="40" cy="30.5" r="1.8" fill="#9edbff"/>
+          <circle cx="43.5" cy="33.5" r="1.8" fill="#9edbff"/>
+        </svg>
+      </div>
+      <div class="wordmark">
+        <div class="t">TMDC GAMES</div>
+        <div class="s">The Million Dollar Company</div>
+      </div>
     </div>
-    <div id="mobileMenu" class="glass container" role="menu" aria-label="Mobile">
-      <a href="#games" role="menuitem">Games</a>
-      <a href="#features" role="menuitem">Features</a>
-      <a href="#about" role="menuitem">About</a>
-      <a href="#contact" role="menuitem">Contact</a>
-      <div style="padding:1rem .2rem"><a class="btn primary" role="menuitem" href="#">Play Now</a></div>
-    </div>
-  </header>
+    <nav role="tablist">
+      <button class="tab" role="tab" aria-controls="tab-games" aria-selected="true">Games</button>
+      <button class="tab" role="tab" aria-controls="tab-about" aria-selected="false">About</button>
+    </nav>
+  </div>
+</header>
 
-  <!-- ===== Hero ===== -->
+<!-- Games Tab -->
+<main class="panel" id="tab-games" aria-hidden="false">
   <section class="hero">
-    <div class="container hero-grid">
-      <div>
-        <span class="eyebrow"><span class="spark"></span><span class="tag">New</span><span>Arcade vibes, no downloads</span></span>
-        <h1>Neon‑clean, modern UI for your HTML games</h1>
-        <p class="lead">A slick, accessible layout for TMDC: responsive header, glass cards, game grid, and a contact form with quick suggestions — all in a single HTML file.</p>
-        <div class="hero-actions">
-          <a class="btn primary" href="#games" aria-label="Jump to games">Browse Games</a>
-          <a class="btn" href="#contact">Contact Us</a>
+    <h1 class="title">Welcome to <span class="glowtxt">TMDC Neon Arcade</span></h1>
+    <p class="subtitle">Play <strong>BlockGun</strong> and <strong>Star Skirmish</strong> — zero downloads, just click &amp; play.</p>
+  </section>
+  <div class="grid">
+    <!-- BlockGun Card -->
+    <article class="card">
+      <div class="thumb">
+        <span class="badge">New</span>
+        <span class="badge">Action</span>
+        <span class="badge">Desktop</span>
+        <div class="scanline"></div>
+      </div>
+      <div class="info">
+        <h3>BlockGun</h3>
+        <p class="desc">Physics-driven shooter with destructible blocks and boss fights.</p>
+        <div class="meta">
+          <span class="pill">Shooter</span><span class="pill">Single-player</span>
+        </div>
+        <div class="actions">
+          <a class="btn primary" href="game1.html" target="_blank" rel="noopener">▶ Play</a>
+          <a class="btn" href="#" data-preview="game1.html">👁 Preview</a>
         </div>
       </div>
-      <div class="poster glass float" aria-hidden="true"><div></div></div>
-    </div>
-  </section>
-
-  <!-- ===== Features ===== -->
-  <section id="features">
-    <div class="container">
-      <h2 class="section-title">Polished out of the box</h2>
-      <p class="section-sub">Friendly defaults, modern look, and small touches that make the site feel premium.</p>
-      <div class="cards">
-        <article class="card">
-          <h3>Responsive & Accessible</h3>
-          <p>Keyboard‑navigable menu, large touch targets, and readable contrast that still looks neon.</p>
-        </article>
-        <article class="card">
-          <h3>Glass Panels</h3>
-          <p>Subtle blur, soft borders, and depth without heavy images or frameworks.</p>
-        </article>
-        <article class="card">
-          <h3>Single‑file Setup</h3>
-          <p>Drop‑in HTML with embedded CSS/JS. Keep your current game canvases as is.</p>
-        </article>
+    </article>
+    <!-- Star Skirmish Card -->
+    <article class="card">
+      <div class="thumb">
+        <span class="badge">New</span>
+        <span class="badge">Action</span>
+        <span class="badge">Desktop</span>
+        <div class="scanline"></div>
       </div>
-    </div>
-  </section>
-
-  <!-- ===== Games ===== -->
-  <section id="games">
-    <div class="container">
-      <h2 class="section-title">Play TMDC Titles</h2>
-      <p class="section-sub">Quick previews and one‑click launch. Replace thumbs/links with your builds.</p>
-      <div class="game-grid">
-        <article class="glass game">
-          <a class="thumb" href="#" aria-label="Open BlockGun"></a>
-          <div class="meta"><span class="dot"></span><span>BlockGun v4.3</span> · <span>Desktop</span></div>
-          <div class="actions">
-            <a class="btn primary" href="#">Play</a>
-            <a class="btn" href="#">Details</a>
-          </div>
-        </article>
-        <article class="glass game">
-          <a class="thumb" href="#" aria-label="Open Star Skirmish"></a>
-          <div class="meta"><span class="dot"></span><span>Star Skirmish</span> · <span>Browser</span></div>
-          <div class="actions">
-            <a class="btn primary" href="#">Play</a>
-            <a class="btn" href="#">Details</a>
-          </div>
-        </article>
-        <article class="glass game">
-          <a class="thumb" href="#" aria-label="Open Retro Runner"></a>
-          <div class="meta"><span class="dot"></span><span>Retro Runner</span> · <span>Mobile</span></div>
-          <div class="actions">
-            <a class="btn primary" href="#">Play</a>
-            <a class="btn" href="#">Details</a>
-          </div>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== About ===== -->
-  <section id="about">
-    <div class="container">
-      <div class="glass" style="padding:1.2rem">
-        <h2 class="section-title" style="margin-bottom:.4rem">About TMDC</h2>
-        <p class="section-sub" style="margin:0">We’re a tiny studio shipping fun, fast HTML games. Built by Lucas & Gabriel.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== Contact ===== -->
-  <section id="contact">
-    <div class="container">
-      <div class="glass" style="padding:1.2rem">
-        <h2 class="section-title">Contact Us</h2>
-        <p class="section-sub">Questions, suggestions, bugs — we read everything. Use a quick chip or write your own message.</p>
-        <div class="chip-row" aria-label="Quick suggestions">
-          <button class="chip" data-fill="I found a bug on level 10.">Bug on level 10</button>
-          <button class="chip" data-fill="Please add mobile controls.">Mobile controls</button>
-          <button class="chip" data-fill="Can you make the boss harder after level 20?">Harder bosses</button>
-          <button class="chip" data-fill="I have a partnership idea.">Partnership</button>
+      <div class="info">
+        <h3>Star Skirmish</h3>
+        <p class="desc">High-velocity space battles. Dodge, upgrade, and clash in neon starfields.</p>
+        <div class="meta">
+          <span class="pill">Shooter</span>
         </div>
-        <form id="contactForm" class="" onsubmit="return false" aria-label="Contact form">
-          <label class="tag" for="name">Name</label>
-          <input id="name" name="name" type="text" placeholder="Your name" />
-          <label class="tag" for="email">Email</label>
-          <input id="email" name="email" type="email" placeholder="you@example.com" />
-          <label class="tag" for="message">Message</label>
-          <textarea id="message" name="message" placeholder="Write your message…"></textarea>
-          <div style="display:flex; gap:.6rem; flex-wrap:wrap; align-items:center">
-            <button class="btn primary" id="sendBtn">Send</button>
-            <span id="formNote" class="tag" aria-live="polite"></span>
-          </div>
-        </form>
+        <div class="actions">
+          <a class="btn primary" href="game2.html" target="_blank" rel="noopener">▶ Play</a>
+          <a class="btn" href="#" data-preview="game2.html">👁 Preview</a>
+        </div>
+      </div>
+    </article>
+  </div>
+</main>
+
+<!-- About Tab -->
+<section class="panel" id="tab-about" aria-hidden="true">
+
+  <!-- Gradient hero with stats -->
+  <div class="about-hero-pro">
+    <div class="inner">
+      <!-- Left: blurb -->
+      <div class="lead">
+        <h2>TheMillionDollarCompany (TMDC)</h2>
+        <p>We’re a fresh, ambitious studio building accessible, browser-based games. Founded by Lucas &amp; Gabriel, we believe great gameplay should be one click away for everyone, everywhere.</p>
+        <a href="mailto:tmdcgameshelp@gmail.com" class="email">📧 Email TMDC</a>
+      </div>
+
+      <!-- Right: stat tiles -->
+      <div class="stat-grid">
+        <div class="stat">
+          <h3>2</h3>
+          <small>Founders</small>
+        </div>
+        <div class="stat">
+          <h3>2+</h3>
+          <small>Playable titles</small>
+        </div>
+        <div class="stat">
+          <h3>100%</h3>
+          <small>Browser-first</small>
+        </div>
       </div>
     </div>
-  </section>
+  </div>
 
-  <footer>
-    <div class="container" style="display:flex; justify-content:space-between; gap:1rem; flex-wrap:wrap">
-      <div>© <span id="year"></span> TMDC. All rights reserved.</div>
-      <div>Privacy • Terms • Support</div>
+  <!-- Keep your existing cards below -->
+  <div class="about-grid">
+    <div class="about-card">
+      <h3>About Us</h3>
+      <p>We craft fast, fun web games that blend nostalgia with modern design. Every project balances simplicity with depth so players keep discovering new moments of joy.</p>
     </div>
-  </footer>
+    <div class="about-card">
+      <h3>Mission</h3>
+      <p>Create high-quality HTML games that are instant to play — no installs, no barriers — just jump in and have fun.</p>
+    </div>
+    <div class="about-card">
+      <h3>Values</h3>
+      <div class="chips">
+        <span class="chip">Innovation</span><span class="chip">Creativity</span>
+        <span class="chip">Accessibility</span><span class="chip">Privacy &amp; Respect</span>
+      </div>
+      <p style="margin-top:10px; color:var(--muted)">We don’t hide trackers or collect unnecessary data. Players first, always.</p>
+    </div>
+  </div>
+</section>
 
-  <script>
-    // Mobile menu toggle
-    const menuBtn = document.getElementById('menuBtn');
-    const mobileMenu = document.getElementById('mobileMenu');
-    menuBtn?.addEventListener('click', () => {
-      const open = mobileMenu.classList.toggle('open');
-      menuBtn.setAttribute('aria-expanded', String(open));
-    });
+<footer>
+  <div class="foot">
+    <div>© <span id="year"></span> TMDC • Neon Arcade</div>
+  </div>
+</footer>
 
-    // Contact chips -> fill message
-    const chips = document.querySelectorAll('.chip');
-    const msg = document.getElementById('message');
-    chips.forEach(c => c.addEventListener('click', () => {
-      msg.value = c.dataset.fill;
-      msg.focus();
-    }));
+<dialog id="preview" style="width:min(1000px,92vw);height:min(720px,84vh);border:1px solid #22304f;border-radius:16px;background:rgba(17,22,36,.92);color:var(--text);box-shadow:0 30px 80px #000a;">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid #22304f;background:#0d1424;border-top-left-radius:16px;border-top-right-radius:16px">
+    <strong>Preview</strong>
+    <button class="btn" id="closePrev" style="flex:none;width:auto">✕ Close</button>
+  </div>
+  <iframe id="frame" style="width:100%;height:calc(100% - 46px);border:0;background:#000"></iframe>
+</dialog>
 
-    // Fake send (replace with your endpoint)
-    const form = document.getElementById('contactForm');
-    const note = document.getElementById('formNote');
-    document.getElementById('sendBtn').addEventListener('click', () => {
-      const data = {
-        name: document.getElementById('name').value.trim(),
-        email: document.getElementById('email').value.trim(),
-        message: document.getElementById('message').value.trim()
-      };
-      if(!data.email || !data.message){
-        note.textContent = 'Please add your email and a message.';
-        note.style.color = 'var(--warn)';
-        return;
-      }
-      // Example: fetch('/api/contact', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)})
-      note.textContent = 'Thanks! We\'ll get back to you soon.';
-      note.style.color = 'var(--good)';
-      form.reset();
-    });
+<script>
+  const tabs=document.querySelectorAll('.tab');
+  const panels=document.querySelectorAll('.panel');
+  function activate(id){
+    tabs.forEach(b=>b.setAttribute('aria-selected','false'));
+    panels.forEach(p=>p.setAttribute('aria-hidden','true'));
+    document.querySelector(`[aria-controls="${id}"]`)?.setAttribute('aria-selected','true');
+    document.getElementById(id)?.setAttribute('aria-hidden','false');
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  tabs.forEach(btn=>btn.addEventListener('click',()=>activate(btn.getAttribute('aria-controls'))));
 
-    // Year
-    document.getElementById('year').textContent = new Date().getFullYear();
-  </script>
+  const dlg=document.getElementById('preview');
+  const frame=document.getElementById('frame');
+  document.querySelectorAll('[data-preview]').forEach(a=>{
+    a.addEventListener('click',e=>{e.preventDefault();frame.src=a.getAttribute('data-preview');dlg.showModal();});
+  });
+  document.getElementById('closePrev').addEventListener('click',()=>{frame.src='about:blank';dlg.close();});
+
+  document.getElementById('year').textContent=new Date().getFullYear();
+</script>
 </body>
 </html>
+
+
