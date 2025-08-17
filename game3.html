@@ -29,7 +29,18 @@
   <main class="panel">
     <h1><span class="glow">Neon Runner</span> — Coming Soon</h1>
     <p>Endless speed, tight controls, juicy VFX. We’re polishing obstacles, power-ups, and the score chase loop.</p>
-    <p>Want early access or to suggest ideas? <a class="btn" href="index.html#tab-contact">Contact us</a></p>
+    <p>Want early access or to suggest ideas? <a class="btn" href="#" onclick="
+        try {
+          // Show the Contact tab on the parent page
+          parent.activate && parent.activate('tab-contact');
+          // Close the preview dialog if present
+          var closeBtn = parent.document.getElementById('closePrev');
+          if (closeBtn) closeBtn.click();
+        } catch (err) {
+          // Fallback: navigate to the contact tab at top level
+          parent.location.href = 'index.html#tab-contact';
+        }
+        return false;">Contact us</a></p>
     <div class="progress"></div>
     <a class="btn" href="index.html">← Back to Arcade</a>
   </main>
