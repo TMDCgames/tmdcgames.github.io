@@ -100,7 +100,7 @@
         <div class="desc">Start from your last saved level.</div>
       </div>
       <div class="card-btn" onclick="UI.openLevelSelect()">
-        <div class="emoji">🗝</div>
+        <div class="emoji">🧭</div>
         <div class="name">Level Select</div>
         <div class="desc">Jump to any level you've unlocked.</div>
       </div>
@@ -110,7 +110,7 @@
         <div class="desc">Upgrades, ammo & mod packs.</div>
       </div>
       <div class="card-btn" onclick="UI.openCodex()">
-        <div class="emoji">💘</div>
+        <div class="emoji">📘</div>
         <div class="name">Codex</div>
         <div class="desc">How to play, weapons, enemies, bosses.</div>
       </div>
@@ -525,7 +525,7 @@ const ModUI = {
   manageWeapon(w){
     const choices=document.createElement('div'); choices.className='grid';
     const root=$('#mods'); const panel=root.querySelector('.panel');
-    const modal=document.createElement('div'); modal.className='card-btn'; modal.style.padding='12px'; modal.innerHTML=`<div class="name">Manage: ${w.name}</div><div class="desc">Slots: ${(w.mods||[]).length}/2</div>`;
+    const modal=document.createElement('div'); modal.className='card-btn'; modal.style.padding='12px'; modal.innerHTML=`<div class="name">Manage: ${w.name}</div><div class="desc">Slots: ${ (w.mods||[]).length }/2</div>`;
     const btnAdd=document.createElement('div'); btnAdd.className='btn'; btnAdd.textContent='Attach from Inventory'; btnAdd.onclick=()=>{ if(!Game.modInventory.length){ alert('No mods in inventory. Buy a Mod Pack in the Shop.'); return; } const m=Game.modInventory.shift(); attachMod(w,m); this.refresh(); panel.removeChild(modal); };
     const btnClear=document.createElement('div'); btnClear.className='btn'; btnClear.textContent='Clear Mods'; btnClear.onclick=()=>{ w.mods=[]; this.refresh(); panel.removeChild(modal); };
     modal.appendChild(document.createElement('div')).appendChild(btnAdd);
@@ -812,7 +812,7 @@ function applyDamage(amount){
 }
 function die(){
   Game.state='dead'; explodeFX();
-  if(Settings.particles){ for(let i=0;i<50;i++) spawnParticle({x:Game.player.x+Game.player.w/2,y:Game.player.y+Game.player.h/2,vx=(Math.random()-.5)*560,vy=(Math.random()-.5)*560,life:0.6,color:'#ff6b6b'}); }
+  if(Settings.particles){ for(let i=0;i<50;i++) spawnParticle({x:Game.player.x+Game.player.w/2,y:Game.player.y+Game.player.h/2,vx:(Math.random()-.5)*560,vy:(Math.random()-.5)*560,life:0.6,color:'#ff6b6b'}); }
   HUD.hide(); UI.showDeath();
 }
 function continueCost(){ const ch=Math.floor((Game.level-1)/10)+1; const within=((Game.level-1)%10)+1; return 10 + ch*10 + within*2; }
@@ -907,7 +907,7 @@ function moveEnemies(dt){
     if(e.hp<=0){
       const ex4=e.x+e.w/2, ey4=e.y+e.h/2;
       Game.enemies.splice(i,1); Game.score+=(e.type==='boss'?800:100);
-      floatText(e.type==='boss'?'+800':'+100',ex4,ey4,'#8ef'); if(Settings.particles){ const count=e.type==='boss'?36:16; for(let k=0;k<count;k++) spawnParticle({x:ex4,y:ey4,vx=(Math.random()-.5)*340,vy=(Math.random()-.5)*340,life:0.6,color:e.type==='boss'?'#ff9bb0':'#ffd1d1'}); }
+      floatText(e.type==='boss'?'+800':'+100',ex4,ey4,'#8ef'); if(Settings.particles){ const count=e.type==='boss'?36:16; for(let k=0;k<count;k++) spawnParticle({x:ex4,y:ey4,vx:(Math.random()-.5)*340,vy:(Math.random()-.5)*340,life:0.6,color:e.type==='boss'?'#ff9bb0':'#ffd1d1'}); }
       if(Math.random()<(e.type==='boss'?0.9:0.12)){ const gx=Math.floor(ex4/TILE), gy=Math.floor(ey4/TILE); if(Game.map[gy] && Game.map[gy][gx]!==SOLID) Game.map[gy][gx]=POWERUP; }
       onPlayerKill();
       if(e.type==='boss'){ Game.goalActive=true; const gx=MAP_W-4, gy=MAP_H-3; clearRect(gx-1,gy-1,3,3); addRect(gx,gy,2,2,GOAL); unlockBossArena(); Game.bossLocked=false; toast('Boss defeated! Portal opened'); bossHP=-1; }
@@ -1161,3 +1161,5 @@ function openShopFromGame(){ UI.openShop('game'); }
 
 </body>
 </html>
+
+
