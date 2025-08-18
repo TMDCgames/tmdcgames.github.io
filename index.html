@@ -75,6 +75,8 @@ main{padding:28px 0 56px}
   padding:10px 14px;border-radius:12px;border:1px solid var(--border);background:var(--glass);color:var(--text);
   text-decoration:none; font-weight:600; transition:.2s transform,.2s box-shadow,.2s background;
 }
+/* Normalize button height across cards */
+.btn{ line-height:1; min-height:40px; }
 .btn.primary{background:linear-gradient(90deg, rgba(107,243,255,.2), rgba(122,92,255,.2)); border-color:rgba(255,255,255,.18)}
 .btn:hover{transform:translateY(-1px); box-shadow:var(--ring)}
 /* About */
@@ -167,12 +169,13 @@ iframe#frame{width:100%;height:calc(100vh - 180px);border:0;background:#000}
           </div>
         </article>
 
-        <!-- Neon Runner (FIXED: wrapped in article.card) -->
+        <!-- Neon Runner -->
         <article class="card">
           <div class="thumb"></div>
           <div class="badges">
             <span class="badge">New</span>
             <span class="badge">Endless</span>
+            <span class="badge">Desktop</span>
           </div>
           <div class="info">
             <h3>Neon Runner</h3>
@@ -198,8 +201,9 @@ iframe#frame{width:100%;height:calc(100vh - 180px);border:0;background:#000}
             <div class="meta"><span class="pill">Parkour</span><span class="pill">Arcade</span></div>
           </div>
           <div class="actions">
-            <a class="btn primary" href="#">ℹ Teaser</a>
-            <a class="btn" href="#" data-preview="#">👁 Preview</a>
+            <!-- Both buttons open the inline teaser below -->
+            <a class="btn primary" href="#" data-preview="#teaser-parkour">ℹ Teaser</a>
+            <a class="btn" href="#" data-preview="#teaser-parkour">👁 Preview</a>
           </div>
         </article>
       </div>
@@ -259,16 +263,92 @@ iframe#frame{width:100%;height:calc(100vh - 180px);border:0;background:#000}
         <p id="formNote" class="note" aria-live="polite"></p>
       </form>
     </section>
-  </main> <!-- FIXED: closed properly -->
+  </main>
 
   <!-- Preview dialog -->
-  <dialog id="preview">
+  <dialog id="preview" class="dialog">
     <div class="dlgbar">
       <strong>Preview</strong>
       <button class="btn" id="closePrev">Close</button>
     </div>
     <iframe id="frame" title="Game preview"></iframe>
   </dialog>
+
+  <!-- Inline Teaser (loads into iframe via srcdoc) -->
+  <template id="teaser-parkour">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Neon Parkour Rush — Coming Soon</title>
+<style>
+  :root{
+    --text:#eaf2ff; --muted:#a9b7d0; --border:rgba(255,255,255,.12);
+    --bg:#05060d; --bg2:#0a0e1b; --glow1:#6bf3ff; --glow2:#7a5cff;
+    --ring:0 0 0 2px rgba(107,243,255,.35), 0 0 25px rgba(122,92,255,.25);
+  }
+  html,body{height:100%;margin:0;background:
+    radial-gradient(120% 80% at 50% -20%, #111a3b 0%, var(--bg) 40%, var(--bg2) 100%),
+    linear-gradient(180deg, rgba(107,243,255,.05), rgba(122,92,255,.04));
+    color:var(--text); font-family:Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    display:flex; align-items:center; justify-content:center; padding:24px;
+  }
+  .card{
+    width:min(720px, 94vw);
+    background:rgba(255,255,255,.04);
+    border:1px solid var(--border);
+    border-radius:22px;
+    box-shadow:0 10px 50px rgba(0,0,0,.45);
+    padding:22px 20px;
+  }
+  .title{font-size:clamp(22px,5vw,34px);margin:0 0 10px 0;font-weight:800}
+  .glow{background:linear-gradient(90deg,var(--glow1),var(--glow2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  p{margin:0 0 14px 0; color:var(--muted); line-height:1.5}
+  .row{display:grid; gap:14px; margin-top:14px}
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:10px;
+    padding:12px 16px; border-radius:14px; line-height:1; min-height:44px;
+    text-decoration:none; color:var(--text); border:1px solid var(--border);
+    background:rgba(255,255,255,.06); font-weight:600; transition:.2s transform,.2s box-shadow,.2s background;
+  }
+  .btn.primary{background:linear-gradient(90deg, rgba(107,243,255,.18), rgba(122,92,255,.18)); box-shadow:var(--ring)}
+  .btn:hover{transform:translateY(-1px); box-shadow:var(--ring)}
+  .icon{font-size:18px}
+  .row + .row{ margin-top:22px }
+  @media (min-width:560px){
+    .row{ grid-template-columns: 1fr max-content; }
+    .row:last-of-type{ grid-template-columns: 1fr; max-width: 320px }
+  }
+</style>
+</head>
+<body>
+  <section class="card" role="dialog" aria-labelledby="title">
+    <h1 id="title" class="title"><span class="glow">Neon Parkour Rush</span> — Coming Soon</h1>
+    <p>Endless speed, tight controls, juicy VFX. We’re polishing obstacles, power-ups, and the score chase loop.</p>
+    <p>Want early access or to suggest ideas?</p>
+
+    <div class="row">
+      <a class="btn" href="mailto:tmdcgameshelp@gmail.com?subject=Neon%20Parkour%20Rush%20—%20Early%20Access%20/%20Feedback">
+        <span class="icon">✉</span> Contact us
+      </a>
+    </div>
+
+    <div class="row">
+      <a class="btn" id="backBtn" href="#"><span class="icon">↩</span> Back to Arcade</a>
+    </div>
+  </section>
+
+  <script>
+    // Tell parent to close the modal (works across origins)
+    document.getElementById('backBtn').addEventListener('click', function(e){
+      e.preventDefault();
+      parent.postMessage('closePreview','*');
+    });
+  </script>
+</body>
+</html>
+  </template>
 
 <script src="https://cdn.jsdelivr.net/npm/emailjs-com@2/dist/email.min.js"></script>
 <script>
@@ -287,14 +367,42 @@ iframe#frame{width:100%;height:calc(100vh - 180px);border:0;background:#000}
   // ---- Preview modal ----
   const dlg = document.getElementById('preview');
   const frame = document.getElementById('frame');
+
+  // open preview: supports URLs or inline templates by id (#templateId)
   document.querySelectorAll('[data-preview]').forEach(a=>{
     a.addEventListener('click',e=>{
       e.preventDefault();
-      frame.src = a.getAttribute('data-preview');
-      dlg.showModal();
+      const target = a.getAttribute('data-preview') || '';
+      if (target.startsWith('#')) {
+        const tpl = document.querySelector(target);
+        if (tpl) {
+          frame.removeAttribute('src');
+          frame.srcdoc = tpl.innerHTML;
+          dlg.showModal();
+        }
+      } else {
+        frame.srcdoc = '';
+        frame.src = target;
+        dlg.showModal();
+      }
     });
   });
-  document.getElementById('closePrev').addEventListener('click',()=>{ frame.src='about:blank'; dlg.close(); });
+
+  // close dialog button
+  document.getElementById('closePrev').addEventListener('click',()=>{
+    frame.src = 'about:blank';
+    frame.srcdoc = '';
+    dlg.close();
+  });
+
+  // allow inline teaser to close modal via postMessage
+  window.addEventListener('message',(e)=>{
+    if (e.data === 'closePreview') {
+      frame.src = 'about:blank';
+      frame.srcdoc = '';
+      dlg.close();
+    }
+  });
 
   // ---- Contact form ----
   const EMAIL = "tmdcgameshelp@gmail.com";
