@@ -4,23 +4,31 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>TMDC • Neon Arcade</title>
-<meta name="description" content="Play TMDC Games — BlockGun and Star Skirmish. Zero downloads, just click and play.">
+<meta name="description" content="Play TMDC Games — BlockGun, Star Skirmish, and more. Zero downloads—click & play.">
 <meta name="theme-color" content="#0a0f24">
+<meta property="og:title" content="TMDC • Neon Arcade">
+<meta property="og:description" content="Fast, accessible, browser-first arcade. Click & play.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAHUlEQVR42u3BAQ0AAADCoPdPbQ43oAAAAAAAAAAA4AkxWQAAkq5aWwAAAABJRU5ErkJggg==">
 <style>
 :root{
   --bg:#05060d; --bg2:#0a0e1b; --glass:rgba(255,255,255,.06);
   --text:#eaf2ff; --muted:#a9b7d0; --pill:#8acbff;
-  --glow1:#6bf3ff; --glow2:#7a5cff; --good:#43e899; --warn:#ffd166;
+  --glow1:#6bf3ff; --glow2:#7a5cff; --good:#43e899; --warn:#ffd166; --danger:#ff6b6b;
   --border:rgba(255,255,255,.12); --shadow:0 10px 50px rgba(0,0,0,.45);
   --radius:16px; --ring:0 0 0 2px rgba(107,243,255,.35), 0 0 25px rgba(122,92,255,.25);
+  --pill-active: rgba(107,243,255,.18);
 }
-*{box-sizing:border-box} html,body{margin:0;min-height:100%}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
 body{
-  color:var(--text); background:
+  color:var(--text);
+  background:
     radial-gradient(120% 80% at 50% -20%, #111a3b 0%, var(--bg) 40%, var(--bg2) 100%),
     linear-gradient(180deg, rgba(107,243,255,.05), rgba(122,92,255,.04));
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
   line-height:1.45;
+  background-attachment: fixed;
 }
 a{color:inherit}
 .wrap{max-width:1200px;margin:0 auto;padding:24px}
@@ -31,37 +39,67 @@ header{
   border-bottom:1px solid var(--border);
 }
 .bar{display:flex;align-items:center;gap:16px;min-height:64px}
-.logo{display:flex;align-items:center;gap:12px;font-weight:700;letter-spacing:.4px}
-.mark{width:20px;height:20px;border-radius:6px;background:
+.logo{display:flex;align-items:center;gap:12px;font-weight:800;letter-spacing:.4px}
+.mark{width:22px;height:22px;border-radius:6px;background:
   radial-gradient(circle at 30% 30%, var(--glow1), transparent 60%),
   radial-gradient(circle at 70% 70%, var(--glow2), transparent 60%),
   #12224a; box-shadow:var(--ring)}
-.name{opacity:.9}
-nav{margin-left:auto;display:flex;gap:8px}
+.name{opacity:.95}
+nav[role="tablist"]{margin-left:auto;display:flex;gap:8px}
 .tab{
   appearance:none;border:1px solid var(--border);background:var(--glass);color:var(--text);
   padding:10px 14px;border-radius:999px;cursor:pointer;transition:.2s transform,.2s box-shadow,.2s background;
+  font-weight:700;
 }
 .tab[aria-selected="true"]{background:rgba(107,243,255,.08); box-shadow:var(--ring)}
 .tab:focus-visible{outline:none; box-shadow:var(--ring)}
-main{padding:28px 0 56px}
+#adminOpen{margin-left:8px}
+main{padding:28px 0 110px}
+
+/* Announcement banner */
+.banner{display:none;position:sticky;top:64px;z-index:19;background:rgba(255,255,255,.06);
+  border-bottom:1px solid var(--border); padding:10px 0}
+.banner.show{display:block}
+.banner .wrap{display:flex;gap:10px;align-items:center}
+.badge.ann{background:rgba(107,243,255,.18)}
+
 /* Panels */
 .panel{display:none}
 .panel[aria-hidden="false"]{display:block}
+
 /* Hero */
-.hero{display:grid;gap:12px;padding:28px;border:1px solid var(--border);
+.hero{
+  display:grid;gap:12px;padding:28px;border:1px solid var(--border);
   border-radius:var(--radius); background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
-  box-shadow:var(--shadow)}
-.title{font-size:clamp(24px,4vw,34px);font-weight:800}
+  box-shadow:var(--shadow)
+}
+.title{font-size:clamp(24px,4vw,34px);font-weight:900;letter-spacing:.3px}
 .subtitle{color:var(--muted)}
 .glowtxt{background:linear-gradient(90deg,var(--glow1),var(--glow2));-webkit-background-clip:text;background-clip:text;color:transparent}
+
 /* Cards grid */
 .grid{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
-.card{border:1px solid var(--border);border-radius:18px;background:rgba(255,255,255,.04); overflow:hidden; box-shadow:var(--shadow)}
-.thumb{height:120px;background:
-  radial-gradient(60% 60% at 20% 20%, rgba(107,243,255,.22), transparent 60%),
-  radial-gradient(70% 70% at 80% 80%, rgba(122,92,255,.18), transparent 60%),
-  linear-gradient(180deg,#0a0f24,#0a0e1b);}
+.card{
+  border:1px solid var(--border);border-radius:18px;background:rgba(255,255,255,.04);
+  overflow:hidden; box-shadow:var(--shadow);
+  transform:translateZ(0); transition:transform .18s ease, box-shadow .2s ease, border-color .2s ease;
+  perspective:1000px;
+}
+.card:hover{ transform:translateY(-2px); box-shadow:0 14px 60px rgba(0,0,0,.55) }
+.thumb{
+  height:120px;background:
+    radial-gradient(60% 60% at 20% 20%, rgba(107,243,255,.22), transparent 60%),
+    radial-gradient(70% 70% at 80% 80%, rgba(122,92,255,.18), transparent 60%),
+    linear-gradient(180deg,#0a0f24,#0a0e1b);
+  transition:transform .25s ease; position:relative; overflow:hidden;
+}
+.card:hover .thumb{ transform:perspective(800px) rotateX(6deg) rotateY(-6deg) }
+.thumb::after{
+  content:""; position:absolute; inset:-30%; background:
+  linear-gradient(120deg, transparent 40%, rgba(255,255,255,.12) 50%, transparent 60%);
+  transform:translateX(-120%) rotate(8deg); animation:shine 5s linear infinite;
+}
+@keyframes shine{ 0%{transform:translateX(-120%) rotate(8deg)} 100%{transform:translateX(120%) rotate(8deg)} }
 .badges{display:flex;gap:8px;padding:10px}
 .badge{font-size:12px;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid var(--border)}
 .info{padding:14px 14px 6px}
@@ -69,58 +107,158 @@ main{padding:28px 0 56px}
 .desc{color:var(--muted);margin:0 0 10px}
 .meta{display:flex;gap:8px;flex-wrap:wrap}
 .pill{font-size:12px;padding:3px 8px;border-radius:999px;background:rgba(138,203,255,.15)}
-.actions{display:flex;gap:10px;padding:14px}
+.actions{display:flex;gap:10px;padding:14px;align-items:stretch}
 .btn{
   display:inline-flex;align-items:center;justify-content:center;gap:8px;
   padding:10px 14px;border-radius:12px;border:1px solid var(--border);background:var(--glass);color:var(--text);
-  text-decoration:none; font-weight:600; transition:.2s transform,.2s box-shadow,.2s background;
+  text-decoration:none; font-weight:700; transition:.2s transform,.2s box-shadow,.2s background;
+  line-height:1; min-height:40px;
 }
-/* Normalize button height across cards */
-.btn{ line-height:1; min-height:40px; }
 .btn.primary{background:linear-gradient(90deg, rgba(107,243,255,.2), rgba(122,92,255,.2)); border-color:rgba(255,255,255,.18)}
 .btn:hover{transform:translateY(-1px); box-shadow:var(--ring)}
-/* About */
-.about-pro{display:grid;gap:18px;grid-template-columns:1.3fr .9fr}
-.stat-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-.stat{border:1px solid var(--border);border-radius:14px;padding:12px;background:rgba(255,255,255,.04)}
-.stat h3{margin:2px 0 4px}
-.stat small{color:var(--muted)}
-/* Contact */
-form{display:grid;gap:12px}
-.field{display:grid;gap:6px}
-input,textarea{
-  width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--border);
-  background:rgba(255,255,255,.04); color:var(--text)
+.btn:focus-visible{outline:none; box-shadow:0 0 0 2px rgba(107,243,255,.45)}
+
+/* Toolbars & extras */
+.sr-only{ position:absolute !important; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0 }
+.wrap .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:16px 0}
+.toolbar .search{ flex:1 1 260px; position:relative; }
+.toolbar .search input{
+  width:100%; padding:12px 40px 12px 14px; border-radius:12px; border:1px solid var(--border);
+  background:rgba(255,255,255,.05); color:var(--text);
 }
-textarea{min-height:120px;resize:vertical}
-.note{color:var(--muted);font-size:13px}
-/* Modal preview */
-.dialog{border:none;border-radius:16px;width:min(1000px,92vw);padding:0; background:rgba(12,16,28,.92); color:var(--text)}
+.toolbar .search .kbd{
+  position:absolute; right:10px; top:50%; transform:translateY(-50%);
+  font-size:12px; opacity:.75; border:1px solid var(--border); border-radius:6px; padding:2px 6px;
+  background:rgba(255,255,255,.04);
+}
+.filters{display:flex;gap:8px;flex-wrap:wrap}
+.filters .pill-btn{
+  border:1px solid var(--border); background:rgba(255,255,255,.05); color:var(--text);
+  padding:8px 12px; border-radius:999px; cursor:pointer; font-weight:700;
+}
+.filters .pill-btn[aria-pressed="true"]{background:var(--pill-active); box-shadow:var(--ring)}
+
+/* Status badges */
+.badge.offline { background:rgba(255,107,107,.18); border-color:rgba(255,107,107,.45) }
+.badge.comingsoon { background:rgba(255,209,102,.18); border-color:rgba(255,209,102,.45) }
+.badge.teaser { background:rgba(122,92,255,.18); border-color:rgba(122,92,255,.45) }
+.card.is-hidden { display:none !important }
+.card.is-offline { opacity:.7; filter:saturate(.8) }
+
+/* Preview dialog */
+.dialog{border:none;border-radius:16px;width:min(1000px,92vw);padding:0; background:rgba(12,16,28,.92); color:var(--text); position:relative}
 dialog{border:none;border-radius:16px;width:min(1000px,92vw);padding:0; background:rgba(12,16,28,.92); color:var(--text)}
 dialog::backdrop{background:rgba(0,0,0,.45)}
 .dlgbar{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--border);
   background:rgba(255,255,255,.05)}
-iframe#frame{width:100%;height:calc(100vh - 180px);border:0;background:#000}
-.skip{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
-.skip:focus{left:12px;top:12px;width:auto;height:auto;padding:8px 12px;border-radius:10px;background:#1a2748;box-shadow:var(--ring)}
-@media (max-width:900px){ .about-pro{grid-template-columns:1fr} }
-@media (prefers-reduced-motion:reduce){
-  *{transition:none !important; animation:none !important}
+#frame{width:100%;height:calc(100vh - 180px);border:0;background:#000}
+#frame.loading{ filter:grayscale(.1) brightness(.7) }
+#frame.loading + .loader{ position:absolute; inset:64px 0 0 0; display:grid; place-items:center; pointer-events:none }
+.loader .dot{ width:10px;height:10px;border-radius:50%; background:rgba(255,255,255,.8); animation:bdot 1.2s infinite ease-in-out }
+.loader .dot:nth-child(2){ animation-delay:.15s }
+.loader .dot:nth-child(3){ animation-delay:.3s }
+@keyframes bdot{ 0%,80%,100%{ transform:scale(0) } 40%{ transform:scale(1) } }
+
+/* Bottom nav */
+.bottom-nav{
+  position:fixed; left:0; right:0; bottom:0; z-index:30;
+  display:none; gap:8px; justify-content:space-around; align-items:center;
+  background:rgba(10,14,27,.85); backdrop-filter:blur(10px) saturate(140%);
+  border-top:1px solid var(--border); padding:10px 8px;
 }
+.bottom-nav button{
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:4px; border:1px solid var(--border); background:rgba(255,255,255,.06);
+  border-radius:12px; padding:8px 12px; color:var(--text); font-weight:800;
+}
+.bottom-nav button[aria-pressed="true"]{ box-shadow:var(--ring) }
+.bottom-nav .icon{ font-size:16px }
+@media (max-width:720px){ .bottom-nav{ display:flex } }
+
+/* Toast */
+.toast{
+  position:fixed; left:50%; bottom:90px; transform:translateX(-50%) translateY(20px);
+  background:rgba(20,26,46,.9); border:1px solid var(--border); border-radius:12px;
+  padding:10px 14px; box-shadow:var(--shadow); opacity:0; transition:.25s; z-index:40;
+}
+.toast.show{ opacity:1; transform:translateX(-50%) translateY(0) }
+
+/* Admin dialog */
+#adminDlg .tabs{ display:flex; gap:8px; margin:12px 0 }
+#adminDlg .tabs button{ border:1px solid var(--border); background:rgba(255,255,255,.06); color:var(--text); border-radius:10px; padding:8px 12px; font-weight:700 }
+#adminDlg .tabs button[aria-selected="true"]{ box-shadow:var(--ring) }
+.admin-section{ display:none }
+.admin-section[aria-hidden="false"]{ display:block }
+#adminTable th, #adminTable td { padding:10px 12px; border:1px solid var(--border); }
+#adminTable th { text-align:left; background:rgba(255,255,255,.05) }
+#adminTable td { background:rgba(255,255,255,.03) }
+
+/* Contact form styling */
+#contactForm .field { margin-bottom: 12px; display: flex; flex-direction: column; gap: 4px; }
+#contactForm input, #contactForm textarea {
+  width: 100%; padding: 12px 14px; border: 1px solid var(--border);
+  border-radius: 10px; background: rgba(255,255,255,.05); color: var(--text);
+}
+
+/* About (modern) */
+.about-hero{display:grid;gap:18px}
+.about-title{font-size:clamp(26px,4vw,40px);margin:0}
+.about-sub{color:var(--muted);margin:4px 0 12px}
+.about-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.stat2{border:1px solid var(--border);border-radius:14px;padding:14px;background:rgba(255,255,255,.04);text-align:center}
+.stat2 strong{font-size:22px;display:block}
+.about-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.a-card{border:1px solid var(--border);border-radius:14px;padding:14px;background:rgba(255,255,255,.04)}
+.a-card h3{margin:0 0 8px}
+.timeline{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.timeline li{display:grid;grid-template-columns:max-content 1fr;gap:8px;align-items:center}
+.timeline li span{font-weight:800;border:1px solid var(--border);border-radius:999px;padding:2px 8px;background:rgba(255,255,255,.06)}
+
+/* Recently Played row */
+.row-scroller{
+  display:flex; gap:12px; overflow:auto; padding:6px 2px;
+  scroll-snap-type:x proximity;
+}
+.mini-card{
+  min-width:220px; max-width:260px; scroll-snap-align:start;
+  border:1px solid var(--border); border-radius:14px; background:rgba(255,255,255,.04);
+  box-shadow:var(--shadow); overflow:hidden;
+}
+.mini-card .mini-thumb{ height:70px; background:linear-gradient(180deg,#0a0f24,#0a0e1b) }
+.mini-card .mini-body{ padding:10px }
+.mini-card h4{ margin:0 0 6px; font-size:14px }
+.mini-card .badge{ padding:2px 8px; font-size:11px }
+.mini-card .mini-actions{ display:flex; gap:8px; padding:10px }
+.mini-card .btn{ min-height:34px; padding:8px 12px; font-weight:800 }
+
+@media (max-width:900px){ .about-stats{grid-template-columns:1fr 1fr 1fr} }
+@media (prefers-reduced-motion:reduce){ *{transition:none !important; animation:none !important} }
 </style>
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
   <header>
     <div class="wrap bar" role="navigation" aria-label="Primary">
-      <div class="logo"><span class="mark"></span><span class="name">TMDC GAMES</span></div>
+      <div class="logo" aria-label="TMDC Games">
+        <span class="mark" aria-hidden="true"></span><span class="name">TMDC GAMES</span>
+        <span id="siteModePill" class="badge" style="margin-left:8px"></span>
+      </div>
       <nav role="tablist" aria-label="Site sections">
         <button class="tab" role="tab" aria-controls="tab-games" aria-selected="true">Games</button>
         <button class="tab" role="tab" aria-controls="tab-about" aria-selected="false">About</button>
         <button class="tab" role="tab" aria-controls="tab-contact" aria-selected="false">Contact</button>
       </nav>
+      <button id="adminOpen" class="btn" type="button">🛠️ Admin</button>
     </div>
   </header>
+
+  <!-- Announcement Banner -->
+  <div id="banner" class="banner" role="status" aria-live="polite">
+    <div class="wrap">
+      <span class="badge ann">Announcement</span>
+      <span id="bannerText"></span>
+    </div>
+  </div>
 
   <main id="main" class="wrap">
     <!-- GAMES -->
@@ -130,108 +268,60 @@ iframe#frame{width:100%;height:calc(100vh - 180px);border:0;background:#000}
         <p class="subtitle">Play <strong>BlockGun</strong> &amp; <strong>Star Skirmish</strong> — zero downloads, just click &amp; play.</p>
       </div>
 
-      <div class="grid" style="margin-top:16px">
-        <!-- BlockGun -->
-        <article class="card">
-          <div class="thumb"></div>
-          <div class="badges">
-            <span class="badge">New</span>
-            <span class="badge">Action</span>
-            <span class="badge">Desktop</span>
-          </div>
-          <div class="info">
-            <h3>BlockGun</h3>
-            <p class="desc">Physics-driven shooter with destructible blocks and boss fights.</p>
-            <div class="meta"><span class="pill">Shooter</span><span class="pill">Single-player</span></div>
-          </div>
-          <div class="actions">
-            <a class="btn primary" href="game1.html" target="_blank" rel="noopener">▶ Play</a>
-            <a class="btn" href="#" data-preview="game1.html">👁 Preview</a>
-          </div>
-        </article>
-
-        <!-- Star Skirmish -->
-        <article class="card">
-          <div class="thumb"></div>
-          <div class="badges">
-            <span class="badge">New</span>
-            <span class="badge">Action</span>
-            <span class="badge">Desktop</span>
-          </div>
-          <div class="info">
-            <h3>Star Skirmish</h3>
-            <p class="desc">High-velocity space battles. Dodge, upgrade, and clash in neon starfields.</p>
-            <div class="meta"><span class="pill">Shooter</span></div>
-          </div>
-          <div class="actions">
-            <a class="btn primary" href="game2.html" target="_blank" rel="noopener">▶ Play</a>
-            <a class="btn" href="#" data-preview="game2.html">👁 Preview</a>
-          </div>
-        </article>
-
-        <!-- Neon Runner -->
-        <article class="card">
-          <div class="thumb"></div>
-          <div class="badges">
-            <span class="badge">New</span>
-            <span class="badge">Endless</span>
-            <span class="badge">Desktop</span>
-          </div>
-          <div class="info">
-            <h3>Neon Runner</h3>
-            <p class="desc">Dash through glowing obstacles, upgrade speed, chase high scores.</p>
-            <div class="meta"><span class="pill">Runner</span><span class="pill">Arcade</span></div>
-          </div>
-          <div class="actions">
-            <a class="btn primary" href="game4.html" target="_blank" rel="noopener">▶ Play</a>
-            <a class="btn" href="#" data-preview="game4.html">👁 Preview</a>
-          </div>
-        </article>
-
-        <!-- Neon Parkour Rush -->
-        <article class="card">
-          <div class="thumb"></div>
-          <div class="badges">
-            <span class="badge">Coming Soon</span>
-            <span class="badge">Endless</span>
-          </div>
-          <div class="info">
-            <h3>Neon Parkour Rush</h3>
-            <p class="desc">Leap across neon rooftops, slide under beams, and master precision timing.</p>
-            <div class="meta"><span class="pill">Parkour</span><span class="pill">Arcade</span></div>
-          </div>
-          <div class="actions">
-            <!-- Both buttons open the inline teaser below -->
-            <a class="btn primary" href="#" data-preview="#teaser-parkour">ℹ Teaser</a>
-            <a class="btn" href="#" data-preview="#teaser-parkour">👁 Preview</a>
-          </div>
-        </article>
+      <div class="toolbar" id="gamesToolbar">
+        <div class="filters" aria-label="Filters"></div>
+        <div class="search">
+          <input id="gameSearch" placeholder="Search games…" aria-label="Search games (press / to focus)">
+          <span class="kbd">/</span>
+        </div>
       </div>
+
+      <!-- Recently played -->
+      <div id="recentWrap" style="display:none; margin-bottom:12px">
+        <h3 style="margin:6px 0 10px">Recently played</h3>
+        <div class="row-scroller" id="recentRow" role="list"></div>
+      </div>
+
+      <div class="grid" id="gamesGrid" style="margin-top:16px"></div>
     </section>
 
     <!-- ABOUT -->
     <section class="panel" id="tab-about" aria-hidden="true">
-      <div class="about-pro">
+      <div class="about-hero">
         <div>
-          <h2>TheMillionDollarCompany (TMDC)</h2>
-          <p>We’re a fresh, ambitious studio building accessible, browser-based games. Founded by Lucas &amp; Gabriel, we believe great gameplay should be one click away.</p>
-          <p><strong>Focus:</strong> fast load, smooth controls, satisfying progression, and fair design.</p>
-        </div>
-        <div>
-          <div class="stat-grid">
-            <div class="stat"><h3>2+</h3><small>Playable titles</small></div>
-            <div class="stat"><h3>100%</h3><small>Browser-first</small></div>
-            <div class="stat"><h3>0</h3><small>Paywalls</small></div>
+          <h2 class="about-title" id="aboutTitle">We’re <span class="glowtxt">TMDC</span></h2>
+          <p class="about-sub" id="aboutSub">A small studio by Lucas &amp; Gabriel building fast, fair, browser-first games.</p>
+          <div class="about-stats">
+            <div class="stat2"><strong id="stat-count">3+</strong><span>Playable titles</span></div>
+            <div class="stat2"><strong>100%</strong><span>Browser-first</span></div>
+            <div class="stat2"><strong>0</strong><span>Paywalls</span></div>
           </div>
         </div>
+        <div class="about-cards">
+          <article class="a-card">
+            <h3>Our Focus</h3>
+            <ul id="aboutFocusList">
+              <li>Instant play (1-click)</li>
+              <li>Satisfying combat & tight controls</li>
+              <li>Juicy feedback & readable VFX</li>
+              <li>Fair progression (no pay-to-win)</li>
+            </ul>
+          </article>
+          <article class="a-card">
+            <h3>Roadmap</h3>
+            <ol class="timeline" id="aboutRoadmap">
+              <li><span>Now</span> – BlockGun polish pass</li>
+              <li><span>Soon</span> – Neon Parkour Rush early access</li>
+              <li><span>Next</span> – Co-op prototype & seasonal events</li>
+            </ol>
+          </article>
+          <article class="a-card">
+            <h3>Values</h3>
+            <p id="aboutValues">Innovation • Creativity • Accessibility • Respect</p>
+            <p class="note">No hidden trackers. Minimal data. Players first.</p>
+          </article>
+        </div>
       </div>
-
-      <div style="margin-top:18px;border:1px solid var(--border);border-radius:14px;padding:14px;background:rgba(255,255,255,.04)">
-        <h3>Values</h3>
-        <p class="desc">Innovation • Creativity • Accessibility • Respect</p>
-        <p class="note">We don’t hide trackers or collect unnecessary data. Players first, always.</p>
-      </div>
-
     </section>
 
     <!-- CONTACT -->
@@ -269,182 +359,983 @@ iframe#frame{width:100%;height:calc(100vh - 180px);border:0;background:#000}
   <dialog id="preview" class="dialog">
     <div class="dlgbar">
       <strong>Preview</strong>
-      <button class="btn" id="closePrev">Close</button>
+      <span class="spacer"></span>
+      <button class="btn" id="fsBtn" type="button" title="Toggle Fullscreen (f)">⤢ Fullscreen</button>
+      <button class="btn" id="closePrev" type="button">Close</button>
     </div>
     <iframe id="frame" title="Game preview"></iframe>
+    <div class="loader" aria-hidden="true"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
   </dialog>
 
-  <!-- Inline Teaser (loads into iframe via srcdoc) -->
+  <!-- Admin dialog -->
+  <dialog id="adminDlg" class="dialog">
+    <div class="dlgbar">
+      <strong>Admin</strong>
+      <span class="spacer"></span>
+      <button class="btn" id="adminClose" type="button">Close</button>
+    </div>
+    <div style="padding:14px">
+      <!-- Login view -->
+      <section id="adminLoginView">
+        <p class="note">Admin access required. Enter your passphrase.</p>
+        <form id="adminLoginForm" style="display:grid; gap:10px; max-width:420px">
+          <input id="adminPass" type="password" placeholder="Enter admin password" autocomplete="current-password" required>
+          <div style="display:flex; gap:8px; align-items:center">
+            <button class="btn primary" type="submit">🔓 Login</button>
+            <span id="adminLoginNote" class="note" aria-live="polite"></span>
+          </div>
+        </form>
+      </section>
+
+      <!-- Panel view -->
+      <section id="adminPanelView" hidden>
+        <div class="tabs" role="tablist" aria-label="Admin Sections">
+          <button class="tab" data-admin-tab="status" aria-selected="true">Statuses</button>
+          <button class="tab" data-admin-tab="games" aria-selected="false">Games</button>
+          <button class="tab" data-admin-tab="site" aria-selected="false">Site</button>
+          <button class="tab" data-admin-tab="about" aria-selected="false">About</button>
+          <button class="tab" data-admin-tab="data" aria-selected="false">Data</button>
+          <button class="tab" data-admin-tab="security" aria-selected="false">Security</button>
+        </div>
+
+        <!-- Statuses -->
+        <section id="adminSec-status" class="admin-section" aria-hidden="false">
+          <div style="display:flex; gap:8px; align-items:center; margin-bottom:10px">
+            <strong>Game Status Control</strong>
+            <span class="note">Online / Offline / Teaser / Coming Soon / Hidden</span>
+          </div>
+          <div id="adminTableWrap" style="overflow:auto">
+            <table id="adminTable" style="width:100%; border-collapse:separate; border-spacing:0 8px"></table>
+          </div>
+          <div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap">
+            <button id="adminSave" class="btn primary" type="button">💾 Save</button>
+            <button id="adminReset" class="btn" type="button">♻ Reset to defaults</button>
+            <span id="adminNote" class="note" aria-live="polite"></span>
+          </div>
+        </section>
+
+        <!-- Games manager -->
+        <section id="adminSec-games" class="admin-section" aria-hidden="true">
+          <h3>Manage Games</h3>
+          <form id="gameForm" style="display:grid; gap:8px; max-width:720px">
+            <input name="id" type="hidden">
+            <div style="display:grid; gap:8px; grid-template-columns:1fr 1fr">
+              <div><label>Title<input name="title" required></label></div>
+              <div><label>Slug (id)<input name="slug" required></label></div>
+            </div>
+            <div><label>Description<textarea name="desc" rows="3" required></textarea></label></div>
+            <div style="display:grid; gap:8px; grid-template-columns:1fr 1fr">
+              <div><label>Play URL<input name="playUrl" placeholder="game1.html" required></label></div>
+              <div><label>Preview (URL or #template)<input name="preview" placeholder="game1.html or #teaser-..."></label></div>
+            </div>
+            <div style="display:grid; gap:8px; grid-template-columns:1fr 1fr 1fr">
+              <div><label>Tags (comma)<input name="tags" placeholder="Shooter, Single-player"></label></div>
+              <div><label>Badges (comma)<input name="badges" placeholder="New, Action, Desktop"></label></div>
+              <div><label>Status
+                <select name="status">
+                  <option value="online">Online</option>
+                  <option value="offline">Offline</option>
+                  <option value="teaser">Teaser</option>
+                  <option value="comingsoon">Coming Soon</option>
+                  <option value="hidden">Hidden</option>
+                </select>
+              </label></div>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap">
+              <label><input type="checkbox" name="featured"> Featured</label>
+              <label>Order <input type="number" name="order" min="0" step="1" style="width:100px"></label>
+              <button class="btn primary" type="submit">💾 Save Game</button>
+              <button class="btn" type="button" id="gameNew">➕ New</button>
+              <button class="btn" type="button" id="gameDelete">🗑 Delete</button>
+            </div>
+            <span id="gameFormNote" class="note" aria-live="polite"></span>
+          </form>
+          <div style="margin-top:10px">
+            <h4>Games (click to load)</h4>
+            <div id="gamesList" style="display:flex; gap:8px; flex-wrap:wrap"></div>
+          </div>
+        </section>
+
+        <!-- Site settings -->
+        <section id="adminSec-site" class="admin-section" aria-hidden="true">
+          <h3>Site Settings</h3>
+          <div style="display:grid; gap:8px; max-width:720px">
+            <label>Announcement Text
+              <input id="siteAnnText" placeholder="We just shipped a new update!">
+            </label>
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap">
+              <label><input id="siteAnnOn" type="checkbox"> Show announcement banner</label>
+            </div>
+
+            <div style="display:grid; gap:8px; grid-template-columns:1fr 1fr; align-items:center">
+              <div>
+                <label>Site Mode
+                  <select id="siteMode">
+                    <option value="live">Live</option>
+                    <option value="readonly">Read-only</option>
+                    <option value="maintenance">Maintenance</option>
+                  </select>
+                </label>
+              </div>
+              <div class="note">Read-only disables favorites & contact submission; Maintenance forces all games offline.</div>
+            </div>
+
+            <div style="display:flex; gap:8px; flex-wrap:wrap">
+              <button class="btn primary" id="siteSave">💾 Save</button>
+              <span id="siteNote" class="note" aria-live="polite"></span>
+            </div>
+          </div>
+        </section>
+
+        <!-- About settings (editable) -->
+        <section id="adminSec-about" class="admin-section" aria-hidden="true">
+          <h3>About Content</h3>
+          <div style="display:grid; gap:8px; max-width:820px">
+            <label>Title (supports simple HTML like &lt;span class='glowtxt'&gt;TMDC&lt;/span&gt;)
+              <input id="aboutTitleInput" placeholder="We’re &lt;span class='glowtxt'&gt;TMDC&lt;/span&gt;">
+            </label>
+            <label>Subtitle
+              <input id="aboutSubInput" placeholder="A small studio...">
+            </label>
+            <label>Values
+              <input id="aboutValuesInput" placeholder="Innovation • Creativity • Accessibility • Respect">
+            </label>
+            <div style="display:grid; gap:8px; grid-template-columns:1fr 1fr 1fr">
+              <label>Roadmap Now<input id="roadNowInput" placeholder="BlockGun polish pass"></label>
+              <label>Roadmap Soon<input id="roadSoonInput" placeholder="Neon Parkour Rush early access"></label>
+              <label>Roadmap Next<input id="roadNextInput" placeholder="Co-op prototype & seasonal events"></label>
+            </div>
+            <label>Focus (one per line)
+              <textarea id="aboutFocusInput" rows="4" placeholder="Instant play (1-click)
+Satisfying combat & tight controls
+Juicy feedback & readable VFX
+Fair progression (no pay-to-win)"></textarea>
+            </label>
+            <div style="display:flex; gap:8px; flex-wrap:wrap">
+              <button class="btn primary" id="aboutSave">💾 Save About</button>
+              <span id="aboutNote" class="note" aria-live="polite"></span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Data tools -->
+        <section id="adminSec-data" class="admin-section" aria-hidden="true">
+          <h3>Data Tools</h3>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center">
+            <button class="btn" id="exportCfg">⬇️ Export Config</button>
+            <label class="btn" for="importCfg">⬆️ Import Config</label>
+            <input id="importCfg" type="file" accept="application/json" style="display:none">
+            <button class="btn" id="resetUser">🧹 Reset user data (favorites/recent)</button>
+          </div>
+          <p class="note">Export creates a JSON backup of games + site settings + admin password hash (but not your session).</p>
+        </section>
+
+        <!-- Security -->
+        <section id="adminSec-security" class="admin-section" aria-hidden="true">
+          <h3>Security</h3>
+          <form id="pwForm" style="display:grid; gap:8px; max-width:420px">
+            <input id="pwOld" type="password" placeholder="Current password" required>
+            <input id="pwNew" type="password" placeholder="New password (min 8 chars)" minlength="8" required>
+            <button class="btn primary" type="submit">🔐 Change Password</button>
+            <span id="pwNote" class="note" aria-live="polite"></span>
+          </form>
+        </section>
+      </section>
+    </div>
+  </dialog>
+
+  <!-- Inline Teaser -->
   <template id="teaser-parkour">
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Neon Parkour Rush — Coming Soon</title>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Neon Parkour Rush — Teaser</title>
 <style>
-  :root{
-    --text:#eaf2ff; --muted:#a9b7d0; --border:rgba(255,255,255,.12);
-    --bg:#05060d; --bg2:#0a0e1b; --glow1:#6bf3ff; --glow2:#7a5cff;
-    --ring:0 0 0 2px rgba(107,243,255,.35), 0 0 25px rgba(122,92,255,.25);
-  }
-  html,body{height:100%;margin:0;background:
-    radial-gradient(120% 80% at 50% -20%, #111a3b 0%, var(--bg) 40%, var(--bg2) 100%),
-    linear-gradient(180deg, rgba(107,243,255,.05), rgba(122,92,255,.04));
-    color:var(--text); font-family:Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-    display:flex; align-items:center; justify-content:center; padding:24px;
-  }
-  .card{
-    width:min(720px, 94vw);
-    background:rgba(255,255,255,.04);
-    border:1px solid var(--border);
-    border-radius:22px;
-    box-shadow:0 10px 50px rgba(0,0,0,.45);
-    padding:22px 20px;
-  }
-  .title{font-size:clamp(22px,5vw,34px);margin:0 0 10px 0;font-weight:800}
-  .glow{background:linear-gradient(90deg,var(--glow1),var(--glow2));-webkit-background-clip:text;background-clip:text;color:transparent}
-  p{margin:0 0 14px 0; color:var(--muted); line-height:1.5}
-  .row{display:grid; gap:14px; margin-top:14px}
-  .btn{
-    display:inline-flex; align-items:center; justify-content:center; gap:10px;
-    padding:12px 16px; border-radius:14px; line-height:1; min-height:44px;
-    text-decoration:none; color:var(--text); border:1px solid var(--border);
-    background:rgba(255,255,255,.06); font-weight:600; transition:.2s transform,.2s box-shadow,.2s background;
-  }
-  .btn.primary{background:linear-gradient(90deg, rgba(107,243,255,.18), rgba(122,92,255,.18)); box-shadow:var(--ring)}
-  .btn:hover{transform:translateY(-1px); box-shadow:var(--ring)}
-  .icon{font-size:18px}
-  .row + .row{ margin-top:22px }
-  @media (min-width:560px){
-    .row{ grid-template-columns: 1fr max-content; }
-    .row:last-of-type{ grid-template-columns: 1fr; max-width: 320px }
-  }
-</style>
-</head>
+:root{--text:#eaf2ff; --muted:#a9b7d0; --border:rgba(255,255,255,.12); --bg:#05060d; --bg2:#0a0e1b; --glow1:#6bf3ff; --glow2:#7a5cff; --ring:0 0 0 2px rgba(107,243,255,.35), 0 0 25px rgba(122,92,255,.25)}
+html,body{height:100%;margin:0;background:
+  radial-gradient(120% 80% at 50% -20%, #111a3b 0%, var(--bg) 40%, var(--bg2) 100%),
+  linear-gradient(180deg, rgba(107,243,255,.05), rgba(122,92,255,.04));
+  color:var(--text); font-family:Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+  display:flex; align-items:center; justify-content:center; padding:24px}
+.card{ width:min(720px, 94vw); background:rgba(255,255,255,.04); border:1px solid var(--border);
+  border-radius:22px; box-shadow:0 10px 50px rgba(0,0,0,.45); padding:22px 20px}
+.title{font-size:clamp(22px,5vw,34px);margin:0 0 10px 0;font-weight:800}
+.glow{background:linear-gradient(90deg,var(--glow1),var(--glow2));-webkit-background-clip:text;background-clip:text;color:transparent}
+p{margin:0 0 14px 0; color:var(--muted); line-height:1.5}
+.row{display:grid; gap:14px; margin-top:14px}
+.btn{display:inline-flex; align-items:center; justify-content:center; gap:10px; padding:12px 16px; border-radius:14px; min-height:44px; text-decoration:none; color:var(--text); border:1px solid var(--border);
+  background:rgba(255,255,255,.06); font-weight:700; transition:.2s transform,.2s box-shadow,.2s background}
+.btn.primary{background:linear-gradient(90deg, rgba(107,243,255,.18), rgba(122,92,255,.18)); box-shadow:var(--ring)}
+.btn:hover{transform:translateY(-1px); box-shadow:var(--ring)}
+.icon{font-size:18px}
+.row + .row{ margin-top:22px }
+@media (min-width:560px){ .row{ grid-template-columns: 1fr max-content } .row:last-of-type{ grid-template-columns: 1fr; max-width: 320px } }
+</style></head>
 <body>
   <section class="card" role="dialog" aria-labelledby="title">
-    <h1 id="title" class="title"><span class="glow">Neon Parkour Rush</span> — Coming Soon</h1>
+    <h1 id="title" class="title"><span class="glow">Neon Parkour Rush</span> — Teaser</h1>
     <p>Endless speed, tight controls, juicy VFX. We’re polishing obstacles, power-ups, and the score chase loop.</p>
     <p>Want early access or to suggest ideas?</p>
-
-    <div class="row">
-      <a class="btn" href="mailto:tmdcgameshelp@gmail.com?subject=Neon%20Parkour%20Rush%20—%20Early%20Access%20/%20Feedback">
-        <span class="icon">✉</span> Contact us
-      </a>
-    </div>
-
-    <div class="row">
-      <a class="btn" id="backBtn" href="#"><span class="icon">↩</span> Back to Arcade</a>
-    </div>
+    <div class="row"><a class="btn" href="mailto:tmdcgameshelp@gmail.com?subject=Neon%20Parkour%20Rush%20—%20Early%20Access%20/%20Feedback"><span class="icon">✉</span> Contact us</a></div>
+    <div class="row"><a class="btn" id="backBtn" href="#"><span class="icon">↩</span> Back to Arcade</a></div>
   </section>
-
-  <script>
-    // Tell parent to close the modal (works across origins)
-    document.getElementById('backBtn').addEventListener('click', function(e){
-      e.preventDefault();
-      parent.postMessage('closePreview','*');
-    });
-  </script>
-</body>
-</html>
+  <script>document.getElementById('backBtn').addEventListener('click',e=>{e.preventDefault();parent.postMessage('closePreview','*')});</script>
+</body></html>
   </template>
 
+<!-- EmailJS (optional; we fall back to mailto) -->
 <script src="https://cdn.jsdelivr.net/npm/emailjs-com@2/dist/email.min.js"></script>
+
 <script>
-  // ---- Tabs (accessible) ----
-  const tabs = document.querySelectorAll('.tab');
-  const panels = document.querySelectorAll('.panel');
-  function activate(id){
-    tabs.forEach(b=>{b.setAttribute('aria-selected','false')});
-    panels.forEach(p=>p.setAttribute('aria-hidden','true'));
-    document.querySelector(`[aria-controls="${id}"]`).setAttribute('aria-selected','true');
-    document.getElementById(id).setAttribute('aria-hidden','false');
-    window.scrollTo({top:0,behavior:'smooth'});
-  }
-  tabs.forEach(btn=>btn.addEventListener('click',()=>activate(btn.getAttribute('aria-controls'))));
+/* =========================
+   Core: Tabs, Preview Modal, Contact Form
+   ========================= */
+const tabs = document.querySelectorAll('.tab');
+const panels = document.querySelectorAll('.panel');
+function activate(id){
+  tabs.forEach(b=>{b.setAttribute('aria-selected','false')});
+  panels.forEach(p=>p.setAttribute('aria-hidden','true'));
+  document.querySelector(`[aria-controls=\"${id}\"]`).setAttribute('aria-selected','true');
+  document.getElementById(id).setAttribute('aria-hidden','false');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+tabs.forEach(btn=>btn.addEventListener('click',()=>activate(btn.getAttribute('aria-controls'))));
 
-  // ---- Preview modal ----
-  const dlg = document.getElementById('preview');
-  const frame = document.getElementById('frame');
+const banner = document.getElementById('banner');
+const bannerText = document.getElementById('bannerText');
 
-  // open preview: supports URLs or inline templates by id (#templateId)
-  document.querySelectorAll('[data-preview]').forEach(a=>{
-    a.addEventListener('click',e=>{
-      e.preventDefault();
-      const target = a.getAttribute('data-preview') || '';
-      if (target.startsWith('#')) {
-        const tpl = document.querySelector(target);
-        if (tpl) {
-          frame.removeAttribute('src');
-          frame.srcdoc = tpl.innerHTML;
-          dlg.showModal();
-        }
-      } else {
-        frame.srcdoc = '';
-        frame.src = target;
-        dlg.showModal();
-      }
-    });
-  });
+const dlg = document.getElementById('preview');
+const frame = document.getElementById('frame');
+document.addEventListener('click', (ev)=>{
+  const a = ev.target.closest('[data-preview]');
+  if(!a) return;
+  ev.preventDefault();
+  const target = a.getAttribute('data-preview') || '';
+  if (target.startsWith('#')) {
+    const tpl = document.querySelector(target);
+    if (tpl) { frame.removeAttribute('src'); frame.srcdoc = tpl.innerHTML; dlg.showModal(); }
+  } else { frame.srcdoc = ''; frame.src = target; dlg.showModal(); }
+});
+document.getElementById('closePrev').addEventListener('click',()=>{ frame.src='about:blank'; frame.srcdoc=''; dlg.close(); });
+window.addEventListener('message',(e)=>{ if (e.data === 'closePreview') { frame.src='about:blank'; frame.srcdoc=''; dlg.close(); } });
 
-  // close dialog button
-  document.getElementById('closePrev').addEventListener('click',()=>{
-    frame.src = 'about:blank';
-    frame.srcdoc = '';
-    dlg.close();
-  });
-
-  // allow inline teaser to close modal via postMessage
-  window.addEventListener('message',(e)=>{
-    if (e.data === 'closePreview') {
-      frame.src = 'about:blank';
-      frame.srcdoc = '';
-      dlg.close();
-    }
-  });
-
-  // ---- Contact form ----
-  const EMAIL = "tmdcgameshelp@gmail.com";
-  const EMAILJS = { service: 'service_jz4cvxf', template: 'template_dokxss8', publicKey: 'WgRcw9Dm8lTOokPI' };
-  if (EMAILJS.publicKey) { emailjs.init(EMAILJS.publicKey); }
-
-  const f = document.getElementById('contactForm');
-  const note = document.getElementById('formNote');
-  const mailtoBtn = document.getElementById('mailtoBtn');
-
-  function buildMailto(){
-    const name = encodeURIComponent(f.name.value.trim());
-    const from = encodeURIComponent(f.email.value.trim());
-    const topic = encodeURIComponent(f.topic.value.trim() || 'Contact');
-    const msg = encodeURIComponent(f.message.value.trim());
-    const subject = `${topic} — ${name}`;
-    const body = `From: ${name} <${from}>\n\n${msg}`;
-    return `mailto:${EMAIL}?subject=${subject}&body=${body}`;
-  }
-
-  mailtoBtn.addEventListener('click', () => {
-    window.location.href = buildMailto();
-  });
-
-  f.addEventListener('submit', (e) => {
+const EMAIL = "tmdcgameshelp@gmail.com";
+const EMAILJS = { service: 'service_jz4cvxf', template: 'template_dokxss8', publicKey: 'WgRcw9Dm8lTOokPI' };
+if (EMAILJS.publicKey && window.emailjs) { emailjs.init(EMAILJS.publicKey); }
+const f = document.getElementById('contactForm');
+const note = document.getElementById('formNote');
+const mailtoBtn = document.getElementById('mailtoBtn');
+function buildMailto(){
+  const name = encodeURIComponent(f.name.value.trim());
+  const from = encodeURIComponent(f.email.value.trim());
+  const topic = encodeURIComponent(f.topic.value.trim() || 'Contact');
+  const msg = encodeURIComponent(f.message.value.trim());
+  const subject = `${topic} — ${name}`;
+  const body = `From: ${name} <${from}>\\n\\n${msg}`;
+  return `mailto:${EMAIL}?subject=${subject}&body=${body}`;
+}
+mailtoBtn.addEventListener('click', () => { window.location.href = buildMailto(); });
+f.addEventListener('submit', (e) => {
+  const site = JSON.parse(localStorage.getItem('tmdc:site')||'{}');
+  if ((site.mode||'live') === 'readonly') {
     e.preventDefault();
-    if (EMAILJS.service && EMAILJS.template && EMAILJS.publicKey) {
-      emailjs.sendForm(EMAILJS.service, EMAILJS.template, f)
-        .then(() => {
-          note.textContent = 'Message sent. Thank you!';
-          note.style.color = 'var(--good)';
-          f.reset();
-        })
-        .catch(() => {
-          window.location.href = buildMailto();
-          note.textContent = 'Opening your mail app…';
+    note.textContent='Read-only mode: messaging disabled right now.';
+    note.style.color='var(--warn)';
+    return;
+  }
+  e.preventDefault();
+  if (window.emailjs && EMAILJS.service && EMAILJS.template && EMAILJS.publicKey) {
+    emailjs.sendForm(EMAILJS.service, EMAILJS.template, f)
+      .then(() => { note.textContent='Message sent. Thank you!'; note.style.color='var(--good)'; f.reset(); })
+      .catch(() => { window.location.href = buildMailto(); note.textContent='Opening your mail app…'; });
+  } else { window.location.href = buildMailto(); note.textContent='Opening your mail app…'; }
+});
+</script>
+
+<script>
+/* =========================
+   App State, Rendering, Admin Mode (front-end)
+   ========================= */
+(function(){
+  const $ = s => document.querySelector(s);
+  const $$ = s => Array.from(document.querySelectorAll(s));
+  const toast = (msg) => {
+    let t = $('#toast');
+    if(!t){ t = document.createElement('div'); t.className='toast'; t.id='toast'; t.setAttribute('role','status'); t.setAttribute('aria-live','polite'); document.body.appendChild(t); }
+    t.textContent = msg; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(()=>t.classList.remove('show'), 1800);
+  };
+  const storage = {
+    get(k, d){ try{ return JSON.parse(localStorage.getItem(k)) ?? d } catch { return d } },
+    set(k, v){ localStorage.setItem(k, JSON.stringify(v)) },
+    del(k){ localStorage.removeItem(k) }
+  };
+
+  // ---------- DATA MODEL ----------
+  // Keys
+  const K_CFG = 'tmdc:cfg';
+  const K_STATUSES = 'tmdc:admin:status';
+  const K_ADMIN = 'tmdc:admin:session'; // session flag (sessionStorage)
+  const K_HASH = 'tmdc:admin:hash';
+  const K_FILTERS = 'tmdc:filters';
+  const K_FAVS = 'tmdc:favs';
+  const K_RECENT = 'tmdc:recent';
+  const K_SITE = 'tmdc:site';
+  const K_ABOUT = 'tmdc:about';
+
+  // Security lock
+  const K_LOCK   = 'tmdc:admin:lock';   // { until:number(ms), level:0|1|2 }
+  const K_FAILS  = 'tmdc:admin:fails';  // count since last success
+  const LOCK_LADDER_MS = [5*60*1000, 20*60*1000, 24*60*60*1000]; // 5m, 20m, 24h
+
+  // Default admin password: "tmdc-admin-123"
+  const DEFAULT_HASH = "25ff3c1ed77155a2d0b3100d4cdaecb3af4f47fed9665dce50df40ea1306fe17";
+
+  // Default config
+  const DEFAULT_CFG = {
+    games: [
+      { id:"blockgun", order:0, featured:true, title:"BlockGun", desc:"Physics-driven shooter with destructible blocks and boss fights.", badges:["New","Action","Desktop"], tags:["Shooter","Single-player"], playUrl:"game1.html", preview:"game1.html", status:"online" },
+      { id:"starskirmish", order:1, featured:false, title:"Star Skirmish", desc:"High-velocity space battles. Dodge, upgrade, and clash in neon starfields.", badges:["New","Action","Desktop"], tags:["Shooter"], playUrl:"game2.html", preview:"game2.html", status:"online" },
+      { id:"neonrunner", order:2, featured:false, title:"Neon Runner", desc:"Dash through glowing obstacles, upgrade speed, chase high scores.", badges:["New","Endless","Desktop"], tags:["Runner","Arcade"], playUrl:"game4.html", preview:"game4.html", status:"online" },
+      { id:"parkour", order:3, featured:false, title:"Neon Parkour Rush", desc:"Leap across neon rooftops, slide under beams, and master precision timing.", badges:["Teaser","Endless"], tags:["Parkour","Arcade"], playUrl:"#", preview:"#teaser-parkour", status:"teaser" }
+    ]
+  };
+
+  const DEFAULT_SITE = { annOn:false, annText:"", maintenance:false, mode:'live' };
+  const DEFAULT_ABOUT = {
+    title: "We’re <span class='glowtxt'>TMDC</span>",
+    sub: "A small studio by Lucas &amp; Gabriel building fast, fair, browser-first games.",
+    values: "Innovation • Creativity • Accessibility • Respect",
+    focus: [
+      "Instant play (1-click)",
+      "Satisfying combat & tight controls",
+      "Juicy feedback & readable VFX",
+      "Fair progression (no pay-to-win)"
+    ],
+    roadmap: { now:"BlockGun polish pass", soon:"Neon Parkour Rush early access", next:"Co-op prototype & seasonal events" }
+  };
+
+  // Init keys
+  if(!storage.get(K_CFG)) storage.set(K_CFG, DEFAULT_CFG);
+  if(!storage.get(K_SITE)) storage.set(K_SITE, DEFAULT_SITE);
+  if(!storage.get(K_HASH)) storage.set(K_HASH, DEFAULT_HASH);
+  if(!storage.get(K_ABOUT)) storage.set(K_ABOUT, DEFAULT_ABOUT);
+
+  // ---------- RENDER ----------
+  const grid = $('#gamesGrid');
+
+  function render(){
+    const { games } = storage.get(K_CFG, DEFAULT_CFG);
+    const statuses = storage.get(K_STATUSES, {});
+    const site = storage.get(K_SITE, DEFAULT_SITE);
+    const about = storage.get(K_ABOUT, DEFAULT_ABOUT);
+
+    const MODE = site.mode || (site.maintenance ? 'maintenance' : 'live');
+    const IS_MAINT = MODE === 'maintenance';
+    const IS_RO    = MODE === 'readonly';
+
+    // Banner
+    bannerText.textContent = site.annText || "";
+    banner.classList.toggle('show', !!site.annOn);
+
+    // Header pill
+    const pill = document.getElementById('siteModePill');
+    if (pill) {
+      pill.textContent = MODE === 'live' ? 'Live' : (MODE === 'readonly' ? 'Read-only' : 'Maintenance');
+      pill.className = 'badge ' + (MODE==='live'?'': MODE==='readonly'?'comingsoon':'offline');
+    }
+
+    // ABOUT hydrate
+    $('#aboutTitle').innerHTML = about.title || DEFAULT_ABOUT.title;
+    $('#aboutSub').innerHTML   = about.sub   || DEFAULT_ABOUT.sub;
+    $('#aboutValues').textContent = about.values || DEFAULT_ABOUT.values;
+    // Focus list
+    const focusList = $('#aboutFocusList'); focusList.innerHTML = '';
+    (about.focus && about.focus.length ? about.focus : DEFAULT_ABOUT.focus).forEach(item=>{
+      const li = document.createElement('li'); li.textContent = item; focusList.appendChild(li);
+    });
+    // Roadmap
+    const rm = about.roadmap || DEFAULT_ABOUT.roadmap;
+    const road = $('#aboutRoadmap');
+    road.innerHTML = `
+      <li><span>Now</span> – ${rm.now||''}</li>
+      <li><span>Soon</span> – ${rm.soon||''}</li>
+      <li><span>Next</span> – ${rm.next||''}</li>
+    `;
+
+    // sort by order then featured
+    const list = [...games].sort((a,b)=> (a.order??0)-(b.order??0) || (b.featured?-1:0)-(a.featured?-1:0));
+
+    grid.innerHTML = '';
+    list.forEach(g=>{
+      const status = IS_MAINT ? 'offline' : (statuses[g.title] || g.status || 'online');
+      const isHidden = status==='hidden';
+      const isOffline = status==='offline';
+      const isTeaserLike = status==='teaser' || status==='comingsoon';
+
+      const card = document.createElement('article');
+      card.className = 'card';
+      if(isHidden) card.classList.add('is-hidden');
+      if(isOffline) card.classList.add('is-offline');
+
+      const thumb = `<div class="thumb"></div>`;
+      const statusBadge =
+        status==='offline' ? `<span class="badge offline">Offline</span>` :
+        status==='teaser' ? `<span class="badge teaser">Teaser</span>` :
+        status==='comingsoon' ? `<span class="badge comingsoon">Coming Soon</span>` :
+        status==='hidden' ? `<span class="badge">Hidden</span>` : `<span class="badge">Online</span>`;
+      const badges = [statusBadge, ...(g.badges||[]).map(b=>`<span class="badge">${b}</span>`)].join('');
+
+      // actions (Teaser/Coming Soon: show Teaser button that opens preview + toast)
+      const primaryLabel = isTeaserLike ? 'Teaser' : '▶ Play';
+      const playAttrs = isTeaserLike ? `href="#" data-preview="${g.preview||'#'}"`
+                      : (isOffline||isHidden) ? `href="#" aria-disabled="true"`
+                      : `href="${g.playUrl}" target="_blank" rel="noopener"`;
+      const prevTarget = g.preview || g.playUrl;
+      const prevAttrs = prevTarget?.startsWith('#') ? `href="#" data-preview="${prevTarget}"` : `href="${prevTarget}" data-preview="${prevTarget}"`;
+
+      const act = `
+        <div class="actions">
+          <a class="btn primary" ${playAttrs}>${primaryLabel}</a>
+          <a class="btn" ${prevAttrs}>👁 Preview</a>
+        </div>
+      `;
+
+      const metaTags = (g.tags||[]).map(t=>`<span class="pill">${t}</span>`).join('');
+
+      card.innerHTML = `
+        ${thumb}
+        <div class="badges">${badges}</div>
+        <div class="info">
+          <h3>${g.title}</h3>
+          <p class="desc">${g.desc}</p>
+          <div class="meta">${metaTags}</div>
+        </div>
+        ${act}
+      `;
+
+      // corner (favorite only)
+      const corner = document.createElement('div'); corner.style.cssText='position:absolute; right:10px; top:10px; display:flex; gap:8px; z-index:2;';
+      const favs = new Set(storage.get(K_FAVS, []));
+      const isFav = favs.has(g.title);
+      const favBtn = document.createElement('button');
+      favBtn.className='fav-btn'; favBtn.type='button'; favBtn.setAttribute('aria-pressed', isFav?'true':'false');
+      favBtn.setAttribute('aria-label','Toggle favorite');
+      favBtn.innerHTML = `${isFav?'❤️':'🤍'} <span class="sr-only">Favorite</span>`;
+      favBtn.addEventListener('click', ()=>{
+        if (IS_RO) { toast('Site is in Read-only mode.'); return; }
+        const on = favBtn.getAttribute('aria-pressed')==='true';
+        if(on){ favs.delete(g.title); toast('Removed from favorites'); }
+        else { favs.add(g.title); toast('Added to favorites'); }
+        storage.set(K_FAVS, [...favs]);
+        favBtn.setAttribute('aria-pressed', (!on).toString());
+        favBtn.innerHTML = `${!on?'❤️':'🤍'} <span class="sr-only">Favorite</span>`;
+        renderRecent();
+      });
+      card.querySelector('.thumb').appendChild(corner);
+
+      const actions = card.querySelector('.actions');
+      actions.querySelectorAll('a').forEach(a=>{
+        if(a.classList.contains('primary')){
+          if(isTeaserLike){
+            a.addEventListener('click',(e)=>{
+              e.preventDefault();
+              // open preview (teaser) and show contextual toast
+              const t = g.preview || '#';
+              if (t && t !== '#') {
+                if (t.startsWith('#')) {
+                  const tpl = document.querySelector(t);
+                  if (tpl) { frame.removeAttribute('src'); frame.srcdoc = tpl.innerHTML; dlg.showModal(); }
+                } else { frame.srcdoc=''; frame.src = t; dlg.showModal(); }
+              }
+              toast('This game is coming soon. Want early access? Contact us.');
+            });
+          } else if (isOffline || isHidden) {
+            a.addEventListener('click',(e)=>{ e.preventDefault(); toast('This game is Offline or Hidden.'); });
+          } else {
+            a.addEventListener('click', ()=> logRecent(g.title));
+          }
+        } else {
+          a.addEventListener('click', ()=> logRecent(g.title));
+        }
+      });
+
+      grid.appendChild(card);
+    });
+
+    // Stats
+    $('#stat-count').textContent = `${list.filter(g=> (statuses[g.title]||g.status)!=='hidden').length}+`;
+
+    // Filters available tags
+    buildFilters();
+    applyFilters();
+    lazyIn();
+    renderRecent();
+  }
+
+  // ---------- Filters & Search ----------
+  const filtersWrap = $('#gamesToolbar .filters');
+  const searchInput = $('#gameSearch');
+  const activeFilters = new Set(storage.get(K_FILTERS, []));
+  function allTags(){
+    const { games } = storage.get(K_CFG, DEFAULT_CFG);
+    return [...new Set(games.flatMap(g=>[...(g.badges||[]),(g.status==='comingsoon'?'Coming Soon':null),(g.status==='teaser'?'Teaser':null),...(g.tags||[])]).filter(Boolean))];
+  }
+  function buildFilters(){
+    filtersWrap.innerHTML='';
+    const GENRES = allTags();
+    ['All',...GENRES].forEach(g=>{
+      const b=document.createElement('button'); b.className='pill-btn'; b.type='button';
+      const on = activeFilters.size?activeFilters.has(g):g==='All';
+      b.setAttribute('aria-pressed', on.toString());
+      b.textContent=g;
+      b.addEventListener('click',()=>{
+        if(g==='All'){ activeFilters.clear(); }
+        else{ activeFilters.has(g)?activeFilters.delete(g):activeFilters.add(g); }
+        localStorage.setItem(K_FILTERS, JSON.stringify([...activeFilters])); applyFilters(); buildFilters();
+      });
+      filtersWrap.appendChild(b);
+    });
+  }
+  function applyFilters(){
+    const q=(searchInput.value||'').trim().toLowerCase();
+    $$('#gamesGrid .card').forEach(card=>{
+      const text=card.textContent.toLowerCase();
+      const matchesText = !q || text.includes(q);
+      const badges = Array.from(card.querySelectorAll('.badges .badge, .meta .pill')).map(b=>b.textContent.trim());
+      const matchesFilter = activeFilters.size===0 || [...activeFilters].some(f=>badges.includes(f));
+      card.style.display = (matchesText && matchesFilter) ? '' : 'none';
+    });
+  }
+  searchInput.addEventListener('input', applyFilters);
+  window.addEventListener('keydown',(e)=>{ if(e.key==='/' && document.activeElement!==searchInput){ e.preventDefault(); searchInput.focus(); } });
+
+  // ---------- Recently Played (compact & non-pushing) ----------
+  function logRecent(title){
+    const list = JSON.parse(localStorage.getItem(K_RECENT)||'[]');
+    const next = [title, ...list.filter(t=>t!==title)].slice(0,6);
+    localStorage.setItem(K_RECENT, JSON.stringify(next)); renderRecent();
+  }
+  function getGameByTitle(title){
+    const cfg = storage.get(K_CFG, DEFAULT_CFG);
+    return cfg.games.find(x=>x.title===title);
+  }
+  function miniBadgeFor(status){
+    return status==='offline' ? 'offline' : status==='teaser' ? 'teaser' : status==='comingsoon' ? 'comingsoon' : status==='hidden' ? '' : '';
+  }
+  function renderRecent(){
+    const recentWrap = $('#recentWrap'), row = $('#recentRow');
+    const recent = JSON.parse(localStorage.getItem(K_RECENT)||'[]');
+    const favs = new Set(JSON.parse(localStorage.getItem(K_FAVS)||'[]'));
+    const combined = [...new Set([...recent, ...favs])];
+    if(!combined.length){ recentWrap.style.display='none'; return; }
+    row.innerHTML='';
+    const statuses = storage.get(K_STATUSES, {});
+    const site = storage.get(K_SITE, DEFAULT_SITE);
+    const MODE = site.mode || (site.maintenance ? 'maintenance' : 'live');
+    const IS_MAINT = MODE === 'maintenance';
+    combined.forEach(t=>{
+      const g = getGameByTitle(t);
+      if(!g) return;
+      const status = IS_MAINT ? 'offline' : (statuses[g.title] || g.status || 'online');
+      const el = document.createElement('article');
+      el.className = 'mini-card';
+      el.innerHTML = `
+        <div class="mini-thumb"></div>
+        <div class="badges" style="padding:8px">${status==='offline'?'<span class="badge offline">Offline</span>':status==='teaser'?'<span class="badge teaser">Teaser</span>':status==='comingsoon'?'<span class="badge comingsoon">Coming Soon</span>':'<span class="badge">Online</span>'}</div>
+        <div class="mini-body">
+          <h4>${g.title}</h4>
+          <p class="desc" style="margin:0; color:var(--muted); font-size:12px">${g.desc}</p>
+        </div>
+        <div class="mini-actions">
+          ${ (status==='teaser'||status==='comingsoon') ? `<a class="btn primary" href="#" data-preview="${g.preview||'#'}">Teaser</a>`
+                                                       : (status==='offline') ? `<button class="btn" disabled>Offline</button>`
+                                                       : `<a class="btn primary" href="${g.playUrl}" target="_blank" rel="noopener">Play</a>` }
+        </div>
+      `;
+      // Bind mini actions for teaser toast
+      el.querySelectorAll('[data-preview]').forEach(a=>{
+        a.addEventListener('click',(e)=>{
+          e.preventDefault();
+          const target = a.getAttribute('data-preview')||'';
+          if (target.startsWith('#')) {
+            const tpl = document.querySelector(target);
+            if (tpl) { frame.removeAttribute('src'); frame.srcdoc = tpl.innerHTML; dlg.showModal(); }
+          } else { frame.srcdoc=''; frame.src = target; dlg.showModal(); }
+          toast('This game is coming soon. Want early access? Contact us.');
         });
+      });
+      row.appendChild(el);
+    });
+    recentWrap.style.display='';
+  }
+
+  // ---------- Animations ----------
+  function lazyIn(){
+    const appear = new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{
+        if(e.isIntersecting){
+          e.target.style.opacity='1'; e.target.style.transform='translateY(0)';
+          appear.unobserve(e.target);
+        }
+      });
+    }, {threshold:.15});
+    $$('#gamesGrid .card').forEach(c=>{
+      c.style.opacity='0'; c.style.transform='translateY(10px)'; c.style.transition='opacity .4s ease, transform .4s ease';
+      appear.observe(c);
+    });
+  }
+  const fsBtn = $('#fsBtn');
+  if(frame){ const setLoading = (on)=>{ frame.classList.toggle('loading', on); };
+    frame.addEventListener('load', ()=> setLoading(false));
+    const ov=new MutationObserver(()=>{ if(frame.src||frame.srcdoc){ setLoading(true);} });
+    ov.observe(frame,{attributes:true, attributeFilter:['src','srcdoc']}); }
+  fsBtn?.addEventListener('click', async ()=>{ const el=frame; try{ if(!document.fullscreenElement){ await el.requestFullscreen?.(); } else { await document.exitFullscreen?.(); } }catch(e){} });
+  window.addEventListener('keydown', (e)=>{ if(e.key==='f' && dlg.open){ fsBtn?.click(); } });
+
+  // ---------- Admin Mode ----------
+  const adminBtn = $('#adminOpen');
+  const adminDlg = $('#adminDlg');
+  const adminClose = $('#adminClose');
+  const loginView = $('#adminLoginView');
+  const panelView = $('#adminPanelView');
+  const loginForm = $('#adminLoginForm');
+  const loginNote = $('#adminLoginNote');
+
+  const adminTabs = $$('#adminDlg .tabs .tab');
+  const secIds = ['status','games','site','about','data','security'];
+  const sections = Object.fromEntries(secIds.map(id=>[id,$(`#adminSec-${id}`)]));
+
+  const ADMIN = {
+    isLogged: ()=> !!sessionStorage.getItem(K_ADMIN),
+    async hash(s){ const enc = new TextEncoder().encode(s); const buf = await crypto.subtle.digest('SHA-256', enc); return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join(''); },
+    async check(pw){ const hash = await ADMIN.hash(pw); return hash === storage.get(K_HASH, DEFAULT_HASH); },
+    async change(oldPw, newPw){
+      if(!(await ADMIN.check(oldPw))) return false;
+      const newHash = await ADMIN.hash(newPw);
+      storage.set(K_HASH, newHash); return true;
+    }
+  };
+
+  function openAdmin(){ ADMIN.isLogged()?showPanel():showLogin(); adminDlg.showModal(); }
+  function closeAdmin(){ adminDlg.close(); }
+  function showLogin(){ loginView.hidden=false; panelView.hidden=true; loginNote.textContent=''; $('#adminPass').value=''; setTimeout(()=>$('#adminPass').focus(),30); }
+  function showPanel(){ loginView.hidden=true; panelView.hidden=false; switchAdminTab('status'); renderAdminStatus(); renderAdminGames(); hydrateSiteSettings(); hydrateAboutSettings(); }
+  function switchAdminTab(id){
+    adminTabs.forEach(b=>b.setAttribute('aria-selected', (b.dataset.adminTab===id).toString()));
+    for(const k in sections){ sections[k].setAttribute('aria-hidden', (k!==id).toString()); }
+  }
+  adminTabs.forEach(b=>b.addEventListener('click',()=>switchAdminTab(b.dataset.adminTab)));
+  adminBtn?.addEventListener('click', openAdmin);
+  adminClose?.addEventListener('click', closeAdmin);
+
+  // Login with escalating lockouts
+  loginForm?.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const now = Date.now();
+    const lock = storage.get(K_LOCK, null);
+    if (lock && lock.until && now < lock.until) {
+      const ms = lock.until - now;
+      const mins = Math.max(1, Math.ceil(ms/60000));
+      loginNote.style.color='var(--danger)';
+      loginNote.textContent = `Too many failed attempts. Locked for ~${mins} minute(s).`;
+      return;
+    }
+    const pass = $('#adminPass').value;
+    if(await ADMIN.check(pass)){
+      sessionStorage.setItem(K_ADMIN, '1');
+      storage.set(K_FAILS, 0);
+      storage.del(K_LOCK);
+      loginNote.style.color='var(--good)'; loginNote.textContent='Logged in.'; showPanel(); toast('Admin mode enabled');
     } else {
-      window.location.href = buildMailto();
-      note.textContent = 'Opening your mail app…';
+      const fails = (storage.get(K_FAILS, 0) || 0) + 1;
+      storage.set(K_FAILS, fails);
+      if (fails >= 5) {
+        const prev = storage.get(K_LOCK, { level: -1 });
+        const nextLevel = Math.min((prev?.level ?? -1) + 1, LOCK_LADDER_MS.length - 1);
+        const until = now + LOCK_LADDER_MS[nextLevel];
+        storage.set(K_LOCK, { until, level: nextLevel });
+        storage.set(K_FAILS, 0);
+        const mins = Math.ceil(LOCK_LADDER_MS[nextLevel]/60000);
+        loginNote.style.color='var(--danger)';
+        loginNote.textContent = `Too many failed attempts. Locked for ${mins} minute(s).`;
+      } else {
+        loginNote.style.color='var(--danger)';
+        loginNote.textContent = `Incorrect password. (${fails}/5)`;
+      }
     }
   });
+
+  // --- Admin: Statuses ---
+  const adminTable = $('#adminTable');
+  const adminSave = $('#adminSave');
+  const adminReset = $('#adminReset');
+  const adminNote = $('#adminNote');
+
+  function renderAdminStatus(){
+    const { games } = storage.get(K_CFG, DEFAULT_CFG);
+    const map = storage.get(K_STATUSES, {});
+    const rows = [`<tr><th>Game</th><th>Status</th><th>Order</th><th>Featured</th><th>Info</th></tr>`];
+    [...games].sort((a,b)=> (a.order??0)-(b.order??0)).forEach(g=>{
+      const status = map[g.title] || g.status || 'online';
+      rows.push(`
+        <tr data-title="${g.title}">
+          <td><strong>${g.title}</strong></td>
+          <td>
+            <select>
+              <option value="online" ${status==='online'?'selected':''}>Online</option>
+              <option value="offline" ${status==='offline'?'selected':''}>Offline</option>
+              <option value="teaser" ${status==='teaser'?'selected':''}>Teaser</option>
+              <option value="comingsoon" ${status==='comingsoon'?'selected':''}>Coming Soon</option>
+              <option value="hidden" ${status==='hidden'?'selected':''}>Hidden</option>
+            </select>
+          </td>
+          <td><input type="number" value="${g.order??0}" style="width:90px"></td>
+          <td><input type="checkbox" ${g.featured?'checked':''}></td>
+          <td class="note">Teaser/Coming Soon = Preview only • Offline = disabled • Hidden = not shown</td>
+        </tr>
+      `);
+    });
+    adminTable.innerHTML = rows.join('');
+  }
+
+  adminSave?.addEventListener('click', ()=>{
+    if(!ADMIN.isLogged()){ adminNote.style.color='var(--danger)'; adminNote.textContent='Not authorized.'; return; }
+    const statuses = storage.get(K_STATUSES, {});
+    const cfg = storage.get(K_CFG, DEFAULT_CFG);
+    adminTable.querySelectorAll('tr[data-title]').forEach(tr=>{
+      const title = tr.getAttribute('data-title');
+      const sel = tr.querySelector('select').value;
+      const order = Number(tr.querySelector('input[type="number"]').value||0);
+      const featured = tr.querySelector('input[type="checkbox"]').checked;
+      statuses[title] = sel;
+      const g = cfg.games.find(x=>x.title===title);
+      if(g){ g.order = order; g.featured = featured; }
+    });
+    storage.set(K_STATUSES, statuses);
+    storage.set(K_CFG, cfg);
+    adminNote.style.color='var(--good)'; adminNote.textContent='Saved.';
+    render(); toast('Statuses & ordering updated');
+  });
+
+  adminReset?.addEventListener('click', ()=>{
+    if(!ADMIN.isLogged()){ adminNote.style.color='var(--danger)'; adminNote.textContent='Not authorized.'; return; }
+    storage.del(K_STATUSES); adminNote.style.color='var(--good)'; adminNote.textContent='Reset to defaults.';
+    render();
+  });
+
+  // --- Admin: Games manager ---
+  const gameForm = $('#gameForm');
+  const gameFormNote = $('#gameFormNote');
+  const gamesList = $('#gamesList');
+  const gameNew = $('#gameNew');
+  const gameDelete = $('#gameDelete');
+
+  function renderAdminGames(){
+    const { games } = storage.get(K_CFG, DEFAULT_CFG);
+    gamesList.innerHTML='';
+    games.sort((a,b)=>(a.order??0)-(b.order??0)).forEach(g=>{
+      const b=document.createElement('button'); b.className='btn'; b.type='button';
+      b.textContent = `${g.order??0}. ${g.title}`;
+      b.addEventListener('click',()=>loadGameToForm(g.id));
+      gamesList.appendChild(b);
+    });
+    if(games.length) loadGameToForm(games[0].id);
+  }
+
+  function loadGameToForm(id){
+    const cfg = storage.get(K_CFG, DEFAULT_CFG);
+    const g = cfg.games.find(x=>x.id===id) || { id:'', slug:'', title:'', desc:'', badges:[], tags:[], playUrl:'', preview:'', order:cfg.games.length, featured:false, status:'online' };
+    gameForm.id.value = g.id || '';
+    gameForm.title.value = g.title || '';
+    gameForm.slug.value = g.id || g.slug || '';
+    gameForm.desc.value = g.desc || '';
+    gameForm.playUrl.value = g.playUrl || '';
+    gameForm.preview.value = g.preview || '';
+    gameForm.tags.value = (g.tags||[]).join(', ');
+    gameForm.badges.value = (g.badges||[]).join(', ');
+    gameForm.status.value = g.status || 'online';
+    gameForm.featured.checked = !!g.featured;
+    gameForm.order.value = g.order ?? 0;
+  }
+
+  function readFormGame(){
+    return {
+      id: (gameForm.slug.value||'').trim().toLowerCase().replace(/[^a-z0-9\\-]/g,'-'),
+      title: (gameForm.title.value||'').trim(),
+      desc: (gameForm.desc.value||'').trim(),
+      playUrl: (gameForm.playUrl.value||'').trim(),
+      preview: (gameForm.preview.value||'').trim(),
+      tags: (gameForm.tags.value||'').split(',').map(s=>s.trim()).filter(Boolean),
+      badges: (gameForm.badges.value||'').split(',').map(s=>s.trim()).filter(Boolean),
+      status: gameForm.status.value,
+      featured: gameForm.featured.checked,
+      order: Number(gameForm.order.value||0)
+    };
+  }
+
+  gameForm.addEventListener('submit', (e)=>{
+    e.preventDefault();
+    if(!ADMIN.isLogged()){ gameFormNote.style.color='var(--danger)'; gameFormNote.textContent='Not authorized.'; return; }
+    const g = readFormGame();
+    if(!g.id || !g.title || !g.playUrl){ gameFormNote.style.color='var(--danger)'; gameFormNote.textContent='Please fill Title, Slug, and Play URL.'; return; }
+    const cfg = storage.get(K_CFG, DEFAULT_CFG);
+    const idx = cfg.games.findIndex(x=>x.id===g.id);
+    if(idx>=0) cfg.games[idx] = {...cfg.games[idx], ...g};
+    else cfg.games.push(g);
+    storage.set(K_CFG, cfg); renderAdminGames(); render();
+    gameFormNote.style.color='var(--good)'; gameFormNote.textContent='Game saved.';
+  });
+
+  gameNew.addEventListener('click', ()=>{
+    if(!ADMIN.isLogged()){ gameFormNote.style.color='var(--danger)'; gameFormNote.textContent='Not authorized.'; return; }
+    loadGameToForm(''); gameFormNote.textContent='';
+  });
+
+  gameDelete.addEventListener('click', ()=>{
+    if(!ADMIN.isLogged()){ gameFormNote.style.color='var(--danger)'; gameFormNote.textContent='Not authorized.'; return; }
+    const id = (gameForm.slug.value||'').trim();
+    if(!id){ gameFormNote.style.color='var(--danger)'; gameFormNote.textContent='No slug to delete.'; return; }
+    const cfg = storage.get(K_CFG, DEFAULT_CFG);
+    const idx = cfg.games.findIndex(x=>x.id===id);
+    if(idx>=0){ cfg.games.splice(idx,1); storage.set(K_CFG,cfg); renderAdminGames(); render(); gameFormNote.style.color='var(--good)'; gameFormNote.textContent='Deleted.'; }
+    else { gameFormNote.style.color='var(--danger)'; gameFormNote.textContent='Not found.'; }
+  });
+
+  // --- Admin: Site settings ---
+  const siteAnnText = $('#siteAnnText');
+  const siteAnnOn   = $('#siteAnnOn');
+  const siteModeSel = $('#siteMode');
+  const siteSave = $('#siteSave');
+  const siteNote = $('#siteNote');
+
+  function hydrateSiteSettings(){
+    const site = storage.get(K_SITE, DEFAULT_SITE);
+    siteAnnText.value = site.annText || '';
+    siteAnnOn.checked = !!site.annOn;
+    siteModeSel.value = site.mode || (site.maintenance ? 'maintenance' : 'live');
+  }
+  siteSave.addEventListener('click', ()=>{
+    if(!ADMIN.isLogged()){ siteNote.style.color='var(--danger)'; siteNote.textContent='Not authorized.'; return; }
+    const site = storage.get(K_SITE, DEFAULT_SITE);
+    site.annText = siteAnnText.value;
+    site.annOn   = siteAnnOn.checked;
+    site.mode    = siteModeSel.value;
+    site.maintenance = (site.mode === 'maintenance'); // compat
+    storage.set(K_SITE, site); siteNote.style.color='var(--good)'; siteNote.textContent='Saved.'; render(); toast('Site settings updated');
+  });
+
+  // --- Admin: About (editable) ---
+  const aboutTitleInput = $('#aboutTitleInput');
+  const aboutSubInput = $('#aboutSubInput');
+  const aboutValuesInput = $('#aboutValuesInput');
+  const roadNowInput = $('#roadNowInput');
+  const roadSoonInput = $('#roadSoonInput');
+  const roadNextInput = $('#roadNextInput');
+  const aboutFocusInput = $('#aboutFocusInput');
+  const aboutSave = $('#aboutSave');
+  const aboutNote = $('#aboutNote');
+
+  function hydrateAboutSettings(){
+    const about = storage.get(K_ABOUT, DEFAULT_ABOUT);
+    aboutTitleInput.value = about.title || '';
+    aboutSubInput.value = about.sub || '';
+    aboutValuesInput.value = about.values || '';
+    roadNowInput.value = (about.roadmap?.now)||'';
+    roadSoonInput.value = (about.roadmap?.soon)||'';
+    roadNextInput.value = (about.roadmap?.next)||'';
+    aboutFocusInput.value = (about.focus||[]).join('\\n');
+  }
+  aboutSave?.addEventListener('click', ()=>{
+    const about = storage.get(K_ABOUT, DEFAULT_ABOUT);
+    about.title = aboutTitleInput.value || DEFAULT_ABOUT.title;
+    about.sub   = aboutSubInput.value || DEFAULT_ABOUT.sub;
+    about.values = aboutValuesInput.value || DEFAULT_ABOUT.values;
+    about.roadmap = {
+      now: roadNowInput.value || '',
+      soon: roadSoonInput.value || '',
+      next: roadNextInput.value || ''
+    };
+    about.focus = (aboutFocusInput.value||'').split('\\n').map(s=>s.trim()).filter(Boolean);
+    storage.set(K_ABOUT, about);
+    aboutNote.style.color='var(--good)'; aboutNote.textContent='About saved.';
+    render();
+  });
+
+  // --- Admin: Data tools ---
+  const exportCfg = $('#exportCfg');
+  const importCfg = $('#importCfg');
+  const resetUser = $('#resetUser');
+
+  exportCfg.addEventListener('click', ()=>{
+    if(!ADMIN.isLogged()){ toast('Not authorized'); return; }
+    const payload = {
+      cfg: storage.get(K_CFG, DEFAULT_CFG),
+      statuses: storage.get(K_STATUSES, {}),
+      site: storage.get(K_SITE, DEFAULT_SITE),
+      about: storage.get(K_ABOUT, DEFAULT_ABOUT),
+      adminHash: storage.get(K_HASH, DEFAULT_HASH)
+    };
+    const blob = new Blob([JSON.stringify(payload,null,2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a=document.createElement('a'); a.href=url; a.download=`tmdc-backup-${Date.now()}.json`; a.click(); URL.revokeObjectURL(url);
+  });
+
+  importCfg.addEventListener('change', async (e)=>{
+    if(!ADMIN.isLogged()){ toast('Not authorized'); e.target.value=''; return; }
+    const file = e.target.files?.[0]; if(!file) return;
+    try{
+      const text = await file.text(); const obj = JSON.parse(text);
+      if(obj.cfg) storage.set(K_CFG, obj.cfg);
+      if(obj.statuses) storage.set(K_STATUSES, obj.statuses);
+      if(obj.site) storage.set(K_SITE, obj.site);
+      if(obj.about) storage.set(K_ABOUT, obj.about);
+      if(obj.adminHash) storage.set(K_HASH, obj.adminHash);
+      toast('Config imported'); renderAdminGames(); renderAdminStatus(); hydrateSiteSettings(); hydrateAboutSettings(); render();
+    }catch(err){ toast('Import failed: invalid JSON'); }
+    e.target.value='';
+  });
+
+  resetUser.addEventListener('click', ()=>{
+    localStorage.removeItem(K_FAVS); localStorage.removeItem(K_RECENT);
+    toast('User data cleared'); renderRecent(); render();
+  });
+
+  // --- Admin: Security (change password) ---
+  const pwForm = $('#pwForm');
+  const pwOld = $('#pwOld'); const pwNew = $('#pwNew'); const pwNote = $('#pwNote');
+
+  pwForm.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    if(!ADMIN.isLogged()){ pwNote.style.color='var(--danger)'; pwNote.textContent='Not authorized.'; return; }
+    const ok = await ADMIN.change(pwOld.value, pwNew.value);
+    if(ok){ pwNote.style.color='var(--good)'; pwNote.textContent='Password changed.'; pwOld.value=''; pwNew.value=''; }
+    else{ pwNote.style.color='var(--danger)'; pwNote.textContent='Current password incorrect.'; }
+  });
+
+  // Admin open/close
+  $('#adminOpen')?.addEventListener('click', openAdmin);
+  $('#adminClose')?.addEventListener('click', ()=>adminDlg.close());
+
+  // ---------- Bottom nav & shortcuts ----------
+  if(!document.querySelector('.bottom-nav')){
+    const bottom=document.createElement('nav'); bottom.className='bottom-nav'; bottom.setAttribute('aria-label','Mobile');
+    bottom.innerHTML=`<button data-jump="tab-games" aria-pressed="true"><span class="icon">🎮</span>Games</button>
+    <button data-jump="tab-about" aria-pressed="false"><span class="icon">ℹ️</span>About</button>
+    <button data-jump="tab-contact" aria-pressed="false"><span class="icon">✉️</span>Contact</button>`;
+    document.body.appendChild(bottom);
+    bottom.addEventListener('click',(e)=>{ const b=e.target.closest('button[data-jump]'); if(!b) return; const id=b.dataset.jump; activate(id); bottom.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed','false')); b.setAttribute('aria-pressed','true'); window.scrollTo({top:0,behavior:'smooth'}); });
+    $$('.tab').forEach(t=> t.addEventListener('click',()=>{ const id=t.getAttribute('aria-controls'); bottom.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',(x.dataset.jump===id).toString())); }));
+  }
+  window.addEventListener('keydown',(e)=>{
+    if(e.target.matches('input, textarea')) return;
+    if(e.key==='1'){ activate('tab-games'); toast('Go to Games'); }
+    if(e.key==='2'){ activate('tab-about'); toast('Go to About'); }
+    if(e.key==='3'){ activate('tab-contact'); toast('Go to Contact'); }
+    if(e.key==='?'){ toast('Shortcuts: 1=Games, 2=About, 3=Contact, /=Search, f=Fullscreen, a=Admin'); }
+    if(e.key.toLowerCase()==='a'){ openAdmin(); }
+  });
+
+  // ---------- Initial render ----------
+  render();
+})();
 </script>
 </body>
 </html>
