@@ -234,6 +234,35 @@ dialog::backdrop{background:rgba(0,0,0,.45)}
 @media (max-width:900px){ .about-stats{grid-template-columns:1fr 1fr 1fr} }
 @media (prefers-reduced-motion:reduce){ *{transition:none !important; animation:none !important} }
 </style>
+
+<style>
+/* Admin polish */
+#adminDlg .dlgbar { position:sticky; top:0; z-index:1 }
+#adminDlg .tabs { position:sticky; top:48px; z-index:1; background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,0)); padding:8px 0 }
+#adminDlg .tabs button { font-size:14px; padding:8px 12px }
+#adminTable { border-collapse:separate; border-spacing:0 6px }
+#adminTable tr td, #adminTable tr th { border-radius:10px }
+#adminTable tr td:first-child, #adminTable tr th:first-child { border-top-left-radius:10px; border-bottom-left-radius:10px }
+#adminTable tr td:last-child, #adminTable tr th:last-child { border-top-right-radius:10px; border-bottom-right-radius:10px }
+#adminTable select, #adminTable input[type="number"] { background:rgba(255,255,255,.06); border:1px solid var(--border); color:var(--text); border-radius:8px; padding:6px 8px }
+#adminDlg h3 { margin:6px 0 8px }
+#adminDlg .a-card { background:rgba(255,255,255,.04) }
+</style>
+
+
+<style>
+/* Admin UI upgrade v2 */
+#adminDlg .a-card{ background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02)); border:1px solid var(--border); border-radius:14px; padding:12px; box-shadow: var(--shadow) }
+#adminDlg .tabs button[aria-selected="true"]{ background:rgba(255,255,255,.10); border:1px solid var(--border); border-radius:10px }
+#adminDlg .btn{ border-radius:10px }
+</style>
+
+
+<style>
+#adminDlg label input{ width:100%; margin-top:6px }
+#adminDlg details{ background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:10px; padding:8px 10px }
+</style>
+
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
@@ -394,6 +423,8 @@ dialog::backdrop{background:rgba(0,0,0,.45)}
           <button class="tab" data-admin-tab="games" aria-selected="false">Games</button>
           <button class="tab" data-admin-tab="site" aria-selected="false">Site</button>
           <button class="tab" data-admin-tab="about" aria-selected="false">About</button>
+<button class="tab" data-admin-tab="remote" aria-selected="false">Remote</button>
+<button class="tab" data-admin-tab="analytics" aria-selected="false">Analytics</button>
           <button class="tab" data-admin-tab="data" aria-selected="false">Data</button>
           <button class="tab" data-admin-tab="security" aria-selected="false">Security</button>
         </div>
@@ -519,7 +550,59 @@ Fair progression (no pay-to-win)"></textarea>
         </section>
 
         <!-- Data tools -->
-        <section id="adminSec-data" class="admin-section" aria-hidden="true">
+        
+<!-- Analytics -->
+<section id="adminSec-analytics" class="admin-section" aria-hidden="true">
+  <h3>Analytics</h3>
+  <p class="note">Anonymous, local-only stats. Tracks visits and button clicks (Play/Preview/Teaser). No external trackers.</p>
+
+  <div id="ana-cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:10px 0">
+    <article class="a-card"><h3>Total Visits</h3><div id="ana-total" style="font-size:28px;font-weight:900">0</div><div class="note" id="ana-unique">0 unique</div></article>
+    <article class="a-card"><h3>7-Day Visits</h3><div id="ana-spark" style="height:64px"></div></article>
+    <article class="a-card"><h3>Top Game</h3><div id="ana-top" style="font-size:16px;font-weight:800">—</div><div class="note" id="ana-top-plays">0 plays</div></article>
+  </div>
+
+  <div style="display:grid;gap:8px">
+    <h4>Most Played (all time)</h4>
+    <div id="ana-table" style="overflow:auto;border:1px solid var(--border);border-radius:12px"></div>
+  </div>
+
+  <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+    <button class="btn" id="ana-export">⬇️ Export Analytics</button>
+    <button class="btn" id="ana-reset">🧹 Reset Analytics</button>
+    <span class="note" id="ana-note" aria-live="polite"></span>
+  </div>
+</section>
+
+
+<!-- Remote (GitHub) -->
+<section id="adminSec-remote" class="admin-section" aria-hidden="true">
+  <h3>Remote Storage (GitHub)</h3>
+  <p class="note">Make Admin changes global by syncing a JSON file in your GitHub repo. Token stays in <em>your</em> browser (not embedded).</p>
+  <div class="grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px">
+    <label>Owner/User <input id="ghOwner" placeholder="e.g. tmdc-games"></label>
+    <label>Repo <input id="ghRepo" placeholder="e.g. neon-arcade"></label>
+    <label>Branch <input id="ghBranch" value="main"></label>
+    <label>Config Path <input id="ghPath" value="site-config.json"></label>
+    <label>Personal Access Token <input id="ghToken" type="password" placeholder="ghp_... (fine-grained)"></label>
+  </div>
+  <div style="display:flex;gap:8px;margin:10px 0;flex-wrap:wrap">
+    <button class="btn" id="ghLoad">⬇️ Load from GitHub</button>
+    <button class="btn" id="ghSave">⬆️ Save to GitHub</button>
+    <button class="btn" id="ghClear">🧹 Clear token/settings</button>
+    <span class="note" id="ghNote" aria-live="polite"></span>
+  </div>
+  <details style="margin-top:6px">
+    <summary>What gets synced?</summary>
+    <ul class="note">
+      <li>Site status (Online/Offline + note)</li>
+      <li>About content</li>
+      <li>Game flags (Coming Soon/Teaser)</li>
+    </ul>
+  </details>
+</section>
+
+<section id="adminSec-data" class="admin-section" aria-hidden="true">
           <h3>Data Tools</h3>
           <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center">
             <button class="btn" id="exportCfg">⬇️ Export Config</button>
@@ -578,6 +661,394 @@ p{margin:0 0 14px 0; color:var(--muted); line-height:1.5}
     <div class="row"><a class="btn" id="backBtn" href="#"><span class="icon">↩</span> Back to Arcade</a></div>
   </section>
   <script>document.getElementById('backBtn').addEventListener('click',e=>{e.preventDefault();parent.postMessage('closePreview','*')});</script>
+
+<script>
+(function(){
+  // --- Storage helpers expectation ---
+  // Uses existing `storage` helper if present; otherwise define a minimal fallback over localStorage.
+  if (typeof storage === 'undefined') {
+    window.storage = {
+      get: (k, d=null) => {
+        try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch(e){ return d; }
+      },
+      set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} },
+      del: (k) => { try { localStorage.removeItem(k); } catch(e){} }
+    };
+  }
+
+  const K_STATS = 'tmdc:stats'; // { visits:{total, uniques, days{YYYY-MM-DD}}, plays:{title:count}, uid }
+
+  function today(){ return new Date().toISOString().slice(0,10); }
+  function uid(){
+    return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+      (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+    );
+  }
+  function initAnalytics(){
+    const s = storage.get(K_STATS, null) || { visits:{ total:0, uniques:0, days:{} }, plays:{}, uid:null };
+    if (!s.uid) { s.uid = uid(); s.visits.uniques++; }
+    const d = today();
+    s.visits.total = (s.visits.total||0) + 1;
+    s.visits.days[d] = (s.visits.days[d]||0) + 1;
+    storage.set(K_STATS, s);
+  }
+  function trackPlay(title){
+    if (!title) title = 'Unknown';
+    const s = storage.get(K_STATS, { visits:{ total:0, uniques:0, days:{} }, plays:{}, uid:null });
+    s.plays[title] = (s.plays[title]||0) + 1;
+    storage.set(K_STATS, s);
+  }
+  function lastNDaysMap(daysObj, n=7){
+    const out = [];
+    for(let i=n-1;i>=0;i--){
+      const d = new Date(); d.setDate(d.getDate()-i);
+      const key = d.toISOString().slice(0,10);
+      out.push({ date:key, count: (daysObj && daysObj[key])||0 });
+    }
+    return out;
+  }
+  function barSparkline(el, series){
+    if (!el) return;
+    el.innerHTML = '';
+    const max = Math.max(1, ...series.map(s=>s.count));
+    const wrap = document.createElement('div');
+    wrap.style.cssText='display:flex;gap:6px;align-items:flex-end;height:64px';
+    series.forEach(s=>{
+      const b = document.createElement('div');
+      const h = Math.round((s.count / max) * 60) || 2;
+      b.style.cssText = 'width:10px;height:'+h+'px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,.08)';
+      b.title = s.date+': '+s.count;
+      wrap.appendChild(b);
+    });
+    el.appendChild(wrap);
+  }
+  function renderAnalytics(){
+    const totalEl = document.getElementById('ana-total');
+    const uniqEl  = document.getElementById('ana-unique');
+    const sparkEl = document.getElementById('ana-spark');
+    const tableEl = document.getElementById('ana-table');
+    const topEl   = document.getElementById('ana-top');
+    const topPlays= document.getElementById('ana-top-plays');
+    if (!totalEl) return;
+
+    const s = storage.get(K_STATS, { visits:{ total:0, uniques:0, days:{} }, plays:{}, uid:null });
+    totalEl.textContent = (s.visits.total||0).toLocaleString();
+    uniqEl.textContent  = ((s.visits.uniques||0)).toLocaleString() + ' unique';
+
+    const series = lastNDaysMap(s.visits.days||{}, 7);
+    barSparkline(sparkEl, series);
+
+    const entries = Object.entries(s.plays||{}).sort((a,b)=>b[1]-a[1]);
+    if(entries.length){
+      const [topTitle, topCount] = entries[0];
+      if(topEl) topEl.textContent = topTitle;
+      if(topPlays) topPlays.textContent = topCount + ' plays';
+    } else {
+      if(topEl) topEl.textContent = '—';
+      if(topPlays) topPlays.textContent = '0 plays';
+    }
+    const rows = entries.map(([title, count], i)=>`
+      <tr>
+        <td style="padding:8px 10px;border-bottom:1px solid var(--border)">${i+1}</td>
+        <td style="padding:8px 10px;border-bottom:1px solid var(--border)"><strong>${title}</strong></td>
+        <td style="padding:8px 10px;border-bottom:1px solid var(--border)">${count}</td>
+      </tr>
+    `).join('') || `<tr><td style="padding:10px">—</td><td style="padding:10px">No data yet</td><td style="padding:10px">0</td></tr>`;
+    if (tableEl) tableEl.innerHTML = `<table style="width:100%;border-collapse:collapse">
+      <thead>
+        <tr>
+          <th style="text-align:left;padding:8px 10px;border-bottom:1px solid var(--border)">#</th>
+          <th style="text-align:left;padding:8px 10px;border-bottom:1px solid var(--border)">Game</th>
+          <th style="text-align:left;padding:8px 10px;border-bottom:1px solid var(--border)">Plays</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+  }
+
+  // Enhance existing tab switching if present: call renderAnalytics() when entering analytics tab.
+  document.addEventListener('click', (ev) => {
+    const tab = ev.target.closest('[data-admin-tab]');
+    if (tab && tab.getAttribute('data-admin-tab') === 'analytics') {
+      setTimeout(renderAnalytics, 0);
+    }
+  });
+
+  // Export / Reset buttons
+  function hookAnalyticsButtons(){
+    const exp = document.getElementById('ana-export');
+    const rst = document.getElementById('ana-reset');
+    if (exp && !exp._hooked){
+      exp._hooked = true;
+      exp.addEventListener('click', ()=>{
+        const s = storage.get(K_STATS, {});
+        const blob = new Blob([JSON.stringify(s,null,2)], {type:'application/json'});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob); a.download = `tmdc-analytics-${today()}.json`; a.click();
+      });
+    }
+    if (rst && !rst._hooked){
+      rst._hooked = true;
+      rst.addEventListener('click', ()=>{
+        storage.del(K_STATS); renderAnalytics();
+        const n=document.getElementById('ana-note'); if(n){ n.textContent='Analytics reset.'; setTimeout(()=>n.textContent='',1500); }
+      });
+    }
+  }
+
+  // Delegate play/preview/teaser clicks to record plays (works even without code changes elsewhere)
+  document.addEventListener('click', (ev)=>{
+    const el = ev.target.closest('a,button');
+    if(!el) return;
+    const label = (el.getAttribute('data-action') || el.textContent || '').trim().toLowerCase();
+    if(['play','preview','teaser'].some(k=>label.includes(k))){
+      const card = el.closest('[data-game], .game-card, .card, .tile, article, li');
+      let title = null;
+      if (card){
+        const cand = card.querySelector('[data-title], .title, h3, h2, .card-title');
+        if (cand) title = cand.textContent.trim();
+      }
+      // Fallback: find nearest heading anywhere up
+      if (!title){
+        const cand = document.querySelector('h1,h2,h3,h4');
+        if (cand) title = cand.textContent.trim();
+      }
+      trackPlay(title || 'Unknown');
+      // No preventDefault — we only track
+    }
+  });
+
+  // If there's an existing logRecent(title) function, patch it to also trackPlay.
+  try {
+    if (typeof window.logRecent === 'function' && !window.logRecent._patched){
+      const orig = window.logRecent;
+      window.logRecent = function(title){ try{ trackPlay(title);}catch(e){} return orig.apply(this, arguments); };
+      window.logRecent._patched = true;
+    }
+  } catch(e){}
+
+  document.addEventListener('DOMContentLoaded', function(){
+    try { initAnalytics(); } catch(e){}
+    setTimeout(()=>{ renderAnalytics(); hookAnalyticsButtons(); }, 0);
+  });
+
+  // Also try to render after admin dialog opens (if app toggles attributes)
+  const mo = new MutationObserver(()=>{
+    hookAnalyticsButtons();
+  });
+  mo.observe(document.documentElement, {subtree:true, childList:true, attributes:true});
+})();
+</script>
+
+
+<script>
+(function(){
+  function refreshOnAdminOpen(){
+    var dlg = document.getElementById('adminDlg');
+    if(!dlg) return;
+    var mo = new MutationObserver(function(muts){
+      muts.forEach(function(m){
+        if(m.attributeName === 'open' || m.attributeName === 'style'){
+          try{ renderAnalytics(); }catch(e){}
+        }
+      });
+    });
+    mo.observe(dlg, { attributes:true });
+  }
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', refreshOnAdminOpen);
+  } else { refreshOnAdminOpen(); }
+})();
+</script>
+
+
+<button id="adminFab" title="Admin" style="position:fixed;right:16px;bottom:16px;padding:10px 14px;border-radius:999px;border:1px solid var(--border);background:rgba(255,255,255,.08);backdrop-filter:blur(6px);color:var(--text);box-shadow:var(--shadow);z-index:9999">⚙️ Admin</button>
+<script>
+(function(){
+  var fab = document.getElementById('adminFab');
+  function openAdmin(){
+    var dlg = document.getElementById('adminDlg');
+    if(!dlg) return;
+    try { if(typeof dlg.showModal==='function'){ dlg.showModal(); } else { dlg.setAttribute('open',''); } } catch(e){ dlg.setAttribute('open',''); }
+    try { var tabBtn = document.querySelector('[data-admin-tab="analytics"]'); if(tabBtn){ tabBtn.click(); } } catch(e){}
+  }
+  if (fab && !fab._wired){
+    fab._wired = true;
+    fab.addEventListener('click', openAdmin);
+  }
+})();
+</script>
+
+
+<script>
+(function(){
+  // Persist GitHub settings only in this browser
+  const K_GH = 'tmdc:gh';
+  function getGH(){ try{ return JSON.parse(localStorage.getItem(K_GH) || '{}'); }catch(e){ return {}; } }
+  function setGH(v){ try{ localStorage.setItem(K_GH, JSON.stringify(v)); }catch(e){} }
+  function note(msg){ const n=document.getElementById('ghNote'); if(n){ n.textContent=msg; setTimeout(()=>n.textContent='',3000); } }
+
+  function pick(el){ return (document.getElementById(el)?.value||'').trim(); }
+  function fillGH(){
+    const s = getGH();
+    if (document.getElementById('ghOwner')) document.getElementById('ghOwner').value = s.owner||'';
+    if (document.getElementById('ghRepo')) document.getElementById('ghRepo').value = s.repo||'';
+    if (document.getElementById('ghBranch')) document.getElementById('ghBranch').value = s.branch||'main';
+    if (document.getElementById('ghPath')) document.getElementById('ghPath').value = s.path||'site-config.json';
+    if (document.getElementById('ghToken')) document.getElementById('ghToken').value = s.token||'';
+  }
+
+  async function ghGetContents(owner, repo, path, ref){
+    const url = `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(path)}?ref=${encodeURIComponent(ref)}`;
+    const r = await fetch(url, { headers: { 'Accept':'application/vnd.github+json' }});
+    if(!r.ok) throw new Error('GitHub get failed: '+r.status);
+    return r.json();
+  }
+  async function ghPutContents(owner, repo, path, branch, token, content, sha, message){
+    const url = `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(path)}`;
+    const body = {
+      message: message || 'Update site-config via Admin',
+      content: btoa(unescape(encodeURIComponent(content))),
+      branch: branch
+    };
+    if (sha) body.sha = sha;
+    const r = await fetch(url, {
+      method:'PUT',
+      headers:{
+        'Accept':'application/vnd.github+json',
+        'Authorization': 'token ' + token
+      },
+      body: JSON.stringify(body)
+    });
+    if(!r.ok) throw new Error('GitHub put failed: '+r.status);
+    return r.json();
+  }
+
+  function getCurrentConfig(){
+    // Build config object from current UI/store
+    const cfg = { site:{}, about:{}, games:{} };
+    try{
+      // Site status
+      const st = document.getElementById('siteStatus')?.value || 'online';
+      const sn = document.getElementById('siteNote')?.value || '';
+      cfg.site = { status: st, note: sn };
+
+      // About content (admin textarea value if present; else from DOM)
+      const aboutVal = document.getElementById('adminAboutText')?.value
+        || document.getElementById('aboutContent')?.innerHTML || '';
+      cfg.about = { html: aboutVal };
+
+      // Games flags from admin table if present
+      document.querySelectorAll('#adminTable tbody tr').forEach(tr=>{
+        const title = tr.querySelector('[data-title]')?.getAttribute('data-title')
+                    || tr.querySelector('.title')?.textContent?.trim();
+        if(!title) return;
+        const statusSel = tr.querySelector('select[data-field="status"]');
+        const status = statusSel ? statusSel.value : null;
+        const teaser = tr.querySelector('input[type="checkbox"][data-field="teaser"]')?.checked || false;
+        cfg.games[title] = { status: status, teaser: teaser };
+      });
+    }catch(e){}
+    return cfg;
+  }
+
+  function applyConfig(cfg){
+    if(!cfg) return;
+    // Site status
+    try{
+      const st = cfg.site?.status || 'online';
+      const sn = cfg.site?.note || '';
+      if (document.getElementById('siteStatus')) document.getElementById('siteStatus').value = st;
+      if (document.getElementById('siteNote')) document.getElementById('siteNote').value = sn;
+      if (typeof renderAdminStatus === 'function') renderAdminStatus();
+    }catch(e){}
+
+    // About
+    try{
+      if (cfg.about?.html){
+        const adminTA = document.getElementById('adminAboutText');
+        if (adminTA) adminTA.value = cfg.about.html;
+        const aboutSlot = document.getElementById('aboutContent');
+        if (aboutSlot) aboutSlot.innerHTML = cfg.about.html;
+      }
+    }catch(e){}
+
+    // Games
+    try{
+      const gmap = cfg.games || {};
+      document.querySelectorAll('#adminTable tbody tr').forEach(tr=>{
+        const title = tr.querySelector('[data-title]')?.getAttribute('data-title')
+                    || tr.querySelector('.title')?.textContent?.trim();
+        if(!title || !gmap[title]) return;
+        const row = gmap[title];
+        const statusSel = tr.querySelector('select[data-field="status"]');
+        if (statusSel && row.status) statusSel.value = row.status;
+        const teaser = tr.teaserCheckbox || tr.querySelector('input[type="checkbox"][data-field="teaser"]');
+        if (teaser && typeof row.teaser === 'boolean') teaser.checked = row.teaser;
+      });
+      if (typeof renderAdminGames === 'function') renderAdminGames();
+    }catch(e){}
+  }
+
+  async function doLoad(){
+    const owner = pick('ghOwner'), repo = pick('ghRepo'), branch = pick('ghBranch'), path = pick('ghPath');
+    if(!owner || !repo) return note('Owner/Repo required');
+    try{
+      const json = await ghGetContents(owner, repo, path, branch);
+      const content = decodeURIComponent(escape(atob(json.content || '')));
+      const cfg = JSON.parse(content);
+      applyConfig(cfg);
+      note('Loaded from GitHub ✔');
+      // Persist settings (not token unless provided)
+      const s = getGH(); s.owner=owner; s.repo=repo; s.branch=branch; s.path=path; setGH(s);
+    }catch(e){ note('Load failed: '+e.message); }
+  }
+
+  async function doSave(){
+    const owner = pick('ghOwner'), repo = pick('ghRepo'), branch = pick('ghBranch'), path = pick('ghPath');
+    const token = pick('ghToken');
+    if(!owner || !repo) return note('Owner/Repo required');
+    if(!token) return note('Token required to save');
+    try{
+      // Fetch current to get sha (if exists)
+      let sha = null;
+      try{
+        const cur = await ghGetContents(owner, repo, path, branch);
+        sha = cur.sha;
+      }catch(e){ /* new file */ }
+      const cfg = getCurrentConfig();
+      await ghPutContents(owner, repo, path, branch, token, JSON.stringify(cfg, null, 2), sha, 'TMDC Admin: update site-config');
+      note('Saved to GitHub ✔');
+      // Save settings including token (optional): keep only locally
+      setGH({ owner, repo, branch, path, token });
+    }catch(e){ note('Save failed: '+e.message); }
+  }
+
+  function doClear(){ localStorage.removeItem(K_GH); fillGH(); note('Cleared.'); }
+
+  document.addEventListener('click', (ev)=>{
+    const tab = ev.target.closest('[data-admin-tab]');
+    if (tab && tab.getAttribute('data-admin-tab') === 'remote'){ setTimeout(fillGH, 0); }
+  });
+  document.addEventListener('DOMContentLoaded', fillGH);
+  document.getElementById('ghLoad')?.addEventListener('click', doLoad);
+  document.getElementById('ghSave')?.addEventListener('click', doSave);
+  document.getElementById('ghClear')?.addEventListener('click', doClear);
+
+  // Auto-load config on startup if owner/repo/path present (read-only)
+  document.addEventListener('DOMContentLoaded', ()=>{
+    const s = getGH();
+    if (s.owner && s.repo && s.path){
+      // Read from raw URL to avoid rate limits
+      const raw = `https://raw.githubusercontent.com/${s.owner}/${s.repo}/${s.branch||'main'}/${s.path}`;
+      fetch(raw).then(r=> r.ok ? r.text() : Promise.reject('raw 404')).then(txt=>{
+        const cfg = JSON.parse(txt); applyConfig(cfg);
+      }).catch(()=>{});
+    }
+  });
+})();
+</script>
+
 </body></html>
   </template>
 
